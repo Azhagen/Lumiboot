@@ -1,0 +1,40 @@
+cmake_minimum_required(VERSION 3.20)
+
+if(DEFINED CMAKE_CROSSCOMPILING)
+return()
+endif()
+
+set(CMAKE_SYSTEM_NAME       Lumiboot)
+set(CMAKE_SYSTEM_VERSION    0.0.1)
+set(CMAKE_SYSTEM_PROCESSOR  ia16)
+
+if(CMAKE_TOOLCHAIN_FILE)
+endif()
+
+set(TOOL_SUFFIX "")
+if(CMAKE_HOST_WIN32)
+set(TOOL_SUFFIX ".exe")
+endif()
+
+set(CMAKE_C_COMPILER   "ia16-elf-gcc${TOOL_OS_SUFFIX}"       CACHE PATH "C compiler")
+set(CMAKE_CXX_COMPILER "ia16-elf-g++${TOOL_OS_SUFFIX}"       CACHE PATH "C++ compiler")
+set(CMAKE_ASM_COMPILER "ia16-elf-gcc${TOOL_OS_SUFFIX}"       CACHE PATH "assembler")
+set(CMAKE_STRIP        "ia16-elf-strip${TOOL_OS_SUFFIX}"     CACHE PATH "strip")
+set(CMAKE_AR           "ia16-elf-ar${TOOL_OS_SUFFIX}"        CACHE PATH "archive")
+set(CMAKE_LINKER       "ia16-elf-ld${TOOL_OS_SUFFIX}"        CACHE PATH "linker")
+set(CMAKE_NM           "ia16-elf-nm${TOOL_OS_SUFFIX}"        CACHE PATH "nm")
+set(CMAKE_OBJCOPY      "ia16-elf-objcopy${TOOL_OS_SUFFIX}"   CACHE PATH "objcopy")
+set(CMAKE_OBJDUMP      "ia16-elf-objdump${TOOL_OS_SUFFIX}"   CACHE PATH "objdump")
+set(CMAKE_RANLIB       "ia16-elf-ranlib${TOOL_OS_SUFFIX}"    CACHE PATH "ranlib")
+
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+
+set(TARGET_ARCH ia16-elf)
+set(CMAKE_C_COMPILER_TARGET     ${TARGET_ARCH})
+set(CMAKE_CXX_COMPILER_TARGET   ${TARGET_ARCH})

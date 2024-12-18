@@ -1,0 +1,3 @@
+port_e9_hack: enabled=1
+romimage: file=.build/bios/lumiboot.bin
+display_library: sdl2

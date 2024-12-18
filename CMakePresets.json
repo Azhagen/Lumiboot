@@ -1,0 +1,27 @@
+{
+    "version": 9,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/.build",
+            "toolchainFile": ".cmake/ia16-elf.cmake"
+        },
+        {
+            "name": "IBM 5170",
+            "description": "IBM 5170 build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "MinSizeRel",
+                "MACHINE_TYPE": "MACHINE_AT",
+                "CHIPSET_MODEL": "CHIPSET_ISA_AT"
+            },
+            "inherits": "default"
+        }
+    ]
+}
