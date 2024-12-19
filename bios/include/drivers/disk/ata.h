@@ -57,10 +57,10 @@ uint8_t ata_verify_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
 uint8_t ata_format_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     uint16_t sector, uint8_t count, void __far* buffer);
 
-uint8_t ata_read_lba(block_t __far* blk, uint64_t lba,
+uint8_t ata_read_lba(block_t __far* blk, uint32_t lba,
     uint32_t count, void __far* buffer);
-uint8_t ata_write_lba(block_t __far* blk, uint64_t lba,
+uint8_t ata_write_lba(block_t __far* blk, uint32_t lba,
     uint32_t count, void __far* buffer);
-uint8_t ata_verify_lba(block_t __far* blk, uint64_t lba,
+uint8_t ata_verify_lba(block_t __far* blk, uint32_t lba,
     uint32_t count);
-uint8_t ata_seek_lba(block_t __far* blk, uint64_t lba);
+uint8_t ata_seek_lba(block_t __far* blk, uint32_t lba);

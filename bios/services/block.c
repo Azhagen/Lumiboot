@@ -19,7 +19,6 @@ void block_handler(registers_t __seg_ss* const regs)
         case 0x15: block_type(regs); break;
         case 0x16: block_change(regs); break;
 
-/*
         case 0x41: block_ext_check(regs); break;
         case 0x42: block_ext_read(regs); break;
         case 0x43: block_ext_write(regs); break;
@@ -29,7 +28,7 @@ void block_handler(registers_t __seg_ss* const regs)
         case 0x47: block_ext_seek(regs); break;
         case 0x48: block_ext_params(regs); break;
         // case 0x49: block_ext_status(regs); break;
-*/
+
         default:
             regs->ah = 0x01; regs->CF = 1; break;
     }
@@ -77,6 +76,7 @@ void block_read(registers_t __seg_ss* const regs)
     cmd.chs = chs;
     cmd.cnt = regs->al;
     cmd.buf = segoff_to_fp(regs->es, regs->bx);
+
     result  = blk->send_cmd(blk, &cmd);
 
     // for (size_t i = 0; i < 16; ++i)
@@ -342,9 +342,6 @@ void block_ext_read(registers_t __seg_ss* const regs)
     cmd.lba = packet->lba;
     cmd.cnt = packet->blocks;
     cmd.buf = segoff_to_fp(packet->segment, packet->offset);
-
-    // debug_out("[BIOS] Reading %u sectors from LBA %lu\n\r", packet->blocks, (uint32_t)packet->lba);
-
     result  = blk->send_cmd(blk, &cmd);
 
 end:

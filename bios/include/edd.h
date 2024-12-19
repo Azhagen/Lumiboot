@@ -7,8 +7,7 @@ struct __packed edd_address_packet
 {
     uint8_t  length;
     uint8_t  __reserved0;
-    uint8_t  blocks;
-    uint8_t  __reserved1;
+    uint16_t blocks;
     uint16_t offset;
     uint16_t segment;
     uint64_t lba;

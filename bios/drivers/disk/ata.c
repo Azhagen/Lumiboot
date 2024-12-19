@@ -173,7 +173,7 @@ uint8_t ata_send_cmd(block_t __far* blk, command_t __seg_ss* cmd)
             if (blk->flags & BLOCK_XLATE) ata_translate(blk, cmd);
             return ata_format_chs(blk, cmd->chs.cylinders, cmd->chs.heads, cmd->chs.sectors, (uint8_t)cmd->cnt, cmd->buf);
         case BLOCK_CMD_LBA_READ:
-            return ata_read_lba(blk, cmd->lba, cmd->cnt, cmd->buf);
+            return ata_read_lba(blk, (uint32_t)cmd->lba, cmd->cnt, cmd->buf);
         default:
             break;
     }
@@ -193,12 +193,8 @@ uint8_t ata_read_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     // debug_out("[BIOS] Reading %d sectors from CHS %d:%d:%d\n\r",
     //     count, cylinder, head, sector);
 
-    // if (!ata_wait_busy(blk->io)) return BLOCK_ERROR;
-
     uint8_t drive = blk->sub == BLOCK_SUB_PRIMARY ? 0xA0 : 0xB0;
     ata_write(blk->io, ATA_DRIVE, (uint8_t)(drive | (head & 0x0F)));
-
-    // if (!ata_wait_busy_delay(blk->io)) return BLOCK_ERROR;
 
     ata_write(blk->io, ATA_FEATURES, 0x00);
     ata_write(blk->io, ATA_COUNT, count);
@@ -226,9 +222,6 @@ uint8_t ata_read_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
 uint8_t ata_write_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     uint16_t sector, uint8_t count, void __far* buffer)
 {
-    // if (count == 0)
-    //     return BLOCK_ERROR;
-
     // debug_out("[BIOS] Writing %d sectors to CHS %d:%d:%d\n\r",
     //     count, cylinder, head, sector);
 
@@ -309,7 +302,7 @@ uint8_t ata_format_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_read_lba(block_t __far* blk, uint64_t lba, uint32_t count, void __far* buffer)
+uint8_t ata_read_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __far* buffer)
 {
     // debug_out("[BIOS] Reading %lu sectors from LBA %lu\n\r", count, lba);
 
@@ -339,7 +332,7 @@ uint8_t ata_read_lba(block_t __far* blk, uint64_t lba, uint32_t count, void __fa
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_write_lba(block_t __far* blk, uint64_t lba, uint32_t count, void __far* buffer)
+uint8_t ata_write_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __far* buffer)
 {
     // debug_out("[BIOS] Writing %lu sectors to LBA %lu\n\r", count, lba);
 
@@ -372,7 +365,7 @@ uint8_t ata_write_lba(block_t __far* blk, uint64_t lba, uint32_t count, void __f
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_verify_lba(block_t __far* blk, uint64_t lba, uint32_t count)
+uint8_t ata_verify_lba(block_t __far* blk, uint32_t lba, uint32_t count)
 {
     uint8_t drive = blk->sub == BLOCK_SUB_PRIMARY ? 0xE0 : 0xF0;
     ata_write(blk->io, ATA_DRIVE, (uint8_t)(drive | ((lba >> 24) & 0x0F)));
@@ -390,7 +383,7 @@ uint8_t ata_verify_lba(block_t __far* blk, uint64_t lba, uint32_t count)
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_seek_lba(block_t __far* blk, uint64_t lba)
+uint8_t ata_seek_lba(block_t __far* blk, uint32_t lba)
 {
     uint8_t drive = blk->sub == BLOCK_SUB_PRIMARY ? 0xE0 : 0xF0;
     ata_write(blk->io, ATA_DRIVE, (uint8_t)(drive | ((lba >> 24) & 0x0F)));
