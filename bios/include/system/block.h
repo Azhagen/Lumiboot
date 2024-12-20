@@ -5,11 +5,13 @@
 #include "attrib.h"
 
 // TODO: implement all error codes
-#define BLOCK_SUCCESS 0x00
-#define BLOCK_ERROR   0x01
-#define BLOCK_ERR_MEDIA   0x06
-#define BLOCK_ERR_SEEK    0x40
-#define BLOCK_ERR_TIMEOUT 0x80
+#define BLOCK_SUCCESS       0x00
+#define BLOCK_ERROR         0x01
+#define BLOCK_ERR_INVALID   0x01
+#define BLOCK_ERR_ADDR_MARK 0x02
+#define BLOCK_ERR_MEDIA     0x06
+#define BLOCK_ERR_SEEK      0x40
+#define BLOCK_ERR_TIMEOUT   0x80
 
 #define BLOCK_TYPE_RESERVED 0
 #define BLOCK_TYPE_FLOPPY   1
