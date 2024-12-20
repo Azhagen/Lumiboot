@@ -1,5 +1,6 @@
 #include "drivers/disk/fdc.h"
 #include "drivers/chipset/dma.h"
+#include "drivers/misc/cmos.h"
 
 #include "data/floppy.h"
 #include "system/data.h"
@@ -102,6 +103,7 @@ static bool fdc_dma_setup(uint16_t segment, uint16_t offset, uint16_t count, uin
 static uint8_t fdc_set_error(uint8_t st0, uint8_t st1, uint8_t st2)
 {
     if (st0 & 0x08) return FLOPPY_ERR_TIMEOUT;
+    if (st1 & 0x01) return BLOCK_ERR_ADDR_MARK;
     if (st1 & 0x02) return FLOPPY_ERR_PROTECTED;
     if (st1 & 0x04) return FLOPPY_ERR_SECTOR;
     if (st1 & 0x10) return FLOPPY_ERR_OVERRUN;
@@ -214,9 +216,7 @@ static uint8_t fdc_reset_controller(uint16_t iobase)
 
 static uint8_t fdc_cmd_read_id(uint16_t iobase, uint8_t drive, uint8_t head)
 {
-    fdc_select_drive(iobase, drive);
-
-    fdc_send_command(iobase, FDC_CMD_READ_ID_S);
+    fdc_send_command(iobase, FDC_CMD_READ_ID_S | FDC_CMD_EXT_DENSITY);
     fdc_send_command(iobase, (uint8_t)((head << 2) | drive));
 
     if (!fdc_wait_irq())
@@ -278,65 +278,53 @@ static uint8_t fdc_cmd_rwv(block_t __far* blk, geometry_t __seg_ss* chs,
     return fdc_read_response(blk->io);
 }
 
+void fdc_geom_from_type(uint8_t type, geometry_t __seg_ss* geom)
+{
+    switch (type)
+    {
+        case 1: *geom = (geometry_t){ 40, 2, 9  }; return;
+        case 2: *geom = (geometry_t){ 80, 2, 15 }; return;
+        case 3: *geom = (geometry_t){ 80, 2, 9  }; return;
+        case 4: *geom = (geometry_t){ 80, 2, 18 }; return;
+        case 5: *geom = (geometry_t){ 80, 2, 36 }; return;
+        default: unreachable();
+    }
+}
+
 void fdc_detect(void)
 {
     uint16_t iobase = FDC0_IOBASE;
-    uint8_t  error  = 0;
-    uint8_t  count  = 0;
 
-    if (fdc_reset_controller(iobase) != FLOPPY_NO_ERROR) return;
+    uint8_t count = 0;
+    uint8_t floppy_a = (cmos_read(0x10) & 0xF0) >> 4;
+    uint8_t floppy_b = (cmos_read(0x10) & 0x0F) >> 0;
 
-    for (uint8_t i = 0; i < 4; ++i)
+    if (fdc_reset_controller(iobase) != BLOCK_SUCCESS)
+        return;
+
+    if (floppy_a > 0 && floppy_a <= 5)
     {
-        fdc_select_drive(iobase, i);
+        uint8_t drive = 0;
+        geometry_t geom = {};
+        fdc_geom_from_type(floppy_a, &geom);
+        fdc_select_drive(iobase, drive);
+        if (fdc_cmd_recalibrate(iobase, drive) != BLOCK_SUCCESS) return;
+        if (fdc_cmd_recalibrate(iobase, drive) != BLOCK_SUCCESS) return;
+        block_create(BLOCK_TYPE_FLOPPY, count, 0, 0,
+            geom, 512, iobase, to_fp("Floppy A"));
+        count++;
+    }
 
-        debug_out("[BIOS] FDC: Testing drive %d\n\r", i);
-
-        for (uint8_t j = 0; j < 2; ++j)
-        {
-            if ((error = fdc_cmd_recalibrate(iobase, i)) == FLOPPY_NO_ERROR)
-                break;
-        }
-
-        if (error != FLOPPY_NO_ERROR)
-            continue;
-
-        debug_out("[BIOS] FDC: Drive %d detected\n\r", i);
-
-        if (fdc_seek_absolute(iobase, i, 48, 0) != FLOPPY_NO_ERROR)
-            continue;
-
-        if (fdc_seek_absolute(iobase, i, 10, 0) != FLOPPY_NO_ERROR)
-            continue;
-
-        uint8_t j = 0;
-        for (; j < 10; ++j)
-        {
-            uint8_t res = fdc_seek_absolute(iobase, i, (uint8_t)(10 - j), 0);
-            uint8_t st3 = fdc_cmd_drive_status(iobase, i, 0);
-            
-            if ((res != FLOPPY_NO_ERROR) || (st3 & 0x10))
-                break;
-        }
-        
-        if (fdc_cmd_recalibrate(iobase, i) != FLOPPY_NO_ERROR)
-            continue;
-
-        if (j != 10)
-        {
-            debug_out("[BIOS] FDC: Drive %d: 40 tracks\n\r", i);
-            snprintf((char __far*)get_ebda()->buffer, 20, "Floppy %d", i);
-            geometry_t geom = { 40, 0, 0 };
-            block_create(BLOCK_TYPE_FLOPPY, i, 0, 0, geom, 512, iobase, get_ebda()->buffer);
-        }
-        else
-        {
-            debug_out("[BIOS] FDC: Drive %d: 80 tracks\n\r", i);
-            snprintf((char __far*)get_ebda()->buffer, 20, "Floppy %d", i);
-            geometry_t geom = { 80, 0, 0 };
-            block_create(BLOCK_TYPE_FLOPPY, i, 0, 0, geom, 512, iobase, get_ebda()->buffer);
-        }
-
+    if (floppy_b > 0 && floppy_b <= 5)
+    {
+        uint8_t drive = 1;
+        geometry_t geom = {};
+        fdc_geom_from_type(floppy_b, &geom);
+        fdc_select_drive(iobase, drive);
+        if (fdc_cmd_recalibrate(iobase, drive) != BLOCK_SUCCESS) return;
+        if (fdc_cmd_recalibrate(iobase, drive) != BLOCK_SUCCESS) return;
+        block_create(BLOCK_TYPE_FLOPPY, count, 0, 0,
+            geom, 512, iobase, to_fp("Floppy B"));
         count++;
     }
 
@@ -383,15 +371,11 @@ uint8_t fdc_reset(block_t __far* blk)
 uint8_t fdc_sense_media(block_t __far* blk)
 {
     static const uint8_t rates[] = { 0, 1, 2, 3 }; // 500kbps, 300kbps, 250kbps, 1000kbps
-    static const uint8_t sects[] = { 8, 9, 15, 18, 36 };
-
-    uint8_t rate = 0xFF;
-    uint8_t sect = 0xFF;
-
-    fdc_select_drive(blk->io, blk->sub);
 
     for (size_t i = 0; i < array_size(rates); ++i)
     {
+        fdc_select_drive(blk->io, blk->sub);
+
         debug_out("[BIOS] FDC: Drive %d: Testing rate %d\n\r", blk->sub, rates[i]);
 
         io_write(blk->io + FDC_CONF, rates[i]);
@@ -402,20 +386,10 @@ uint8_t fdc_sense_media(block_t __far* blk)
         debug_out("[BIOS] FDC: Drive %d: Media detected, rate %d\n\r", blk->sub, rates[i]);
 
         blk->flags |= BLOCK_MEDIA;
-        rate = rates[i];
-        break;
+        return BLOCK_SUCCESS;
     }
 
-    if (rate == 0xFF)
-    {
-        debug_out("[BIOS] FDC: Drive %d: No media detected\n\r", blk->sub);
-        return BLOCK_ERR_MEDIA;
-    }
-
-
-    debug_out("[BIOS] FDC: Drive %d: No media detected\n\r", blk->sub);
-
-    return BLOCK_ERROR;
+    return BLOCK_ERR_MEDIA;
 }
 
 uint8_t fdc_check_media(block_t __far* blk)
