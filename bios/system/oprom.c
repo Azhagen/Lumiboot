@@ -18,12 +18,16 @@ typedef void __far (*function)(void);
 __noinline
 static void farcall(function func)
 {
-    asm (
+    asm volatile (
         "push %%ds\n\t"
         "push %%es\n\t"
         "push %%si\n\t"
         "push %%di\n\t"
+        "push %%bp\n\t"
+        "pushf\n\t"
         "lcall *%0\n\t"
+        "popf\n\t"
+        "pop  %%bp\n\t"
         "pop  %%di\n\t"
         "pop  %%si\n\t"
         "pop  %%es\n\t"
