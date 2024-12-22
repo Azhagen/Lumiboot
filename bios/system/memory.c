@@ -102,7 +102,12 @@ uint16_t memory_detect_ext16(void)
     asm volatile ("lgdt %0" :: "m"(gdtptr));
     asm volatile ("lidt %0" :: "m"(idtptr));
 
-    return pmode_execute((function_t)memory_do_detect_ext16);
+    uint16_t result = pmode_execute((function_t)memory_do_detect_ext16);
+
+    idtptr = (idt_ptr_t){ 0xFFFF, 0 };
+    asm volatile ("lidt %0" :: "m"(idtptr));
+
+    return result;
 }
 
 static void memory_verify(uint16_t base, uint16_t ext)
