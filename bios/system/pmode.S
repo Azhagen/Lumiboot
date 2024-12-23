@@ -49,12 +49,16 @@ pmode_execute_pmode:
     and  eax, 0x7FFFFFFE
     mov  cr0, eax
 
-    jmp 0xF000:pmode_execute_rmode_386
+    jmp 0xF000:pmode_execute_386
 
-pmode_execute_rmode_386:
+pmode_execute_386:
+    mov  al, 0x80 | 0x0F
+    out  0x70, al
+    mov  al, 0x00
+    out  0x71, al
+
     mov  ax, BDA_SEGM
     mov  ds, ax
-
     mov  ss, [BDA_SPTR + 0]
     mov  sp, [BDA_SPTR + 2]
 
@@ -73,26 +77,20 @@ pmode_execute_rmode:
 pmode_memcpy:
     push bp
     mov  bp, sp
-    cli
-
-    pusha
+    push di
+    push si
     push es
     push ds
 
     mov  ax, BDA_SEGM
     mov  ds, ax
 
-    mov  [BDA_RPTR + 0], cs
+    movw [BDA_RPTR + 0], 0xF000
     movw [BDA_RPTR + 2], OFFSET pmode_memcpy_rmode
-    mov  [BDA_SPTR + 0], ss
-    mov  [BDA_SPTR + 2], sp
+    movw [BDA_SPTR + 0], ss
+    movw [BDA_SPTR + 2], sp
 
-    mov  bx, [bp + 4]
-    mov  es, [bp + 6]
-
-    lgdt es:[bx]
-
-    mov  cx, [bp + 8]
+    mov  cx, [bp + 4]
 
     smsw ax
     or   ax, 1
@@ -116,16 +114,26 @@ pmode_memcpy_pmode:
     out  0x71, al
 
     mov  eax, cr0
-    and  eax, 0xFFFFFFFE
+    and  eax, 0x7FFFFFFE
     mov  cr0, eax
 
-    jmp 0xF000:pmode_memcpy_rmode
+    jmp 0xF000:pmode_memcpy_386
+
+pmode_memcpy_386:
+    mov  al, 0x80 | 0x0F
+    out  0x70, al
+    mov  al, 0x00
+    out  0x71, al
+
+    mov  ax, BDA_SEGM
+    mov  ds, ax
+    mov  ss, [BDA_SPTR + 0]
+    mov  sp, [BDA_SPTR + 2]
 
 pmode_memcpy_rmode:
     pop  ds
     pop  es
-    popa
-
-    sti
+    pop  si
+    pop  di
     pop  bp
     ret

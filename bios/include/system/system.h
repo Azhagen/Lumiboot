@@ -14,6 +14,8 @@
 #include <stdnoreturn.h>
 #include <stdbool.h>
 
+#include "gdt.h"
+
 noreturn void unreachable(void);
 noreturn void panic(void);
 noreturn void reboot_soft(void);
@@ -25,6 +27,11 @@ void mem_detect(void);
 
 void irq_enable(void);
 void irq_disable(void);
+
+void idt_load(idt_ptr_t __far* idtptr);
+void gdt_load(gdt_ptr_t __far* gdtptr);
+void idt_store(idt_ptr_t __far* idtptr);
+void gdt_store(gdt_ptr_t __far* gdtptr);
 
 void rom_init(void);
 

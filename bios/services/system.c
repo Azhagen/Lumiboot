@@ -139,27 +139,20 @@ void system_move_blocks(bioscall __seg_ss* const regs)
     gdt[3].access = 0x93;
     gdt[3].limit_low = 0xFFFF;
 
-    // gdt[4] = (gdt_entry_t){ 0xFFFF, 0x0000, 0x00, 0x92, 0x00, 0x00 }; // 16 bit data segment (data)
-
     gdt_ptr_t gdtptr = { (sizeof(gdt_entry_t) * 4) - 1, to_linear(gdt) };
+    idt_ptr_t idtptr = { 0, 0 };
 
-    // debug_out("source: %x:%x\n\r", gdt[2].base_middle, gdt[2].base_low);
-    // debug_out("dest: %x:%x\n\r", gdt[3].base_middle, gdt[3].base_low);
-    // debug_out("count: %x\n\r", regs->cx);
+    idt_ptr_t saved_idtptr = {};
+    idt_store(&saved_idtptr);
 
-    pmode_memcpy(&gdtptr, regs->cx);
+    irq_disable();
+    gdt_load(&gdtptr);
+    idt_load(&idtptr);
 
-    // debug_out("address of gdt: %P\n\r", gdt);
-    // debug_out("address of gdt[1]: %P\n\r", gdt[0]);
-    // debug_out("address of gdt[1]: %P\n\r", gdt[1]);
+    pmode_memcpy(regs->cx);
 
-    // gdt[2].access = 0x93;
-    // gdt[2].granularity = 0x00;
-    // gdt[2].limit_low = 0xFFFF;ti
-
-    // gdt[3].access = 0x93;
-    // gdt[3].granularity = 0x00;
-    // gdt[3].limit_low = 0xFFFF;
+    idt_load(&saved_idtptr);
+    irq_enable();
 
     regs->ah = 0x00;
     regs->CF = 0;
@@ -195,4 +188,7 @@ void system_read_config(bioscall __seg_ss* const regs)
     const pointer ptr = (pointer)(void __far*)&system_config;
     regs->es = ptr.seg;
     regs->bx = ptr.off;
+    
+    regs->ah = 0;
+    regs->CF = 0;
 }
