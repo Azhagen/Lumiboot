@@ -167,7 +167,7 @@ static inline void uart_set_modem(uint16_t port, uint8_t value)
 static bool is_receive_ready(uint16_t port)
 {
     int16_t timeout = 0x7FFF;
-    while (!uart_is_receive_ready(port) || --timeout > 0);
+    while (!uart_is_receive_ready(port) && --timeout > 0);
     return timeout != 0;
 }
 
@@ -193,13 +193,12 @@ static bool uart_detect_presence(uint16_t port)
     return !(irr & 0xF0);
 }
 
-void uart_init(uint8_t id)
+void uart_init(uint8_t id, bool irq)
 {
     if (id >= SERIAL_COUNT)
         return;
 
     uint16_t port = serial_ports[id];
-    // uint16_t port = uart_get_port(id);
 
     uart_disable_irqs(port);
     // uart_set_baud(port, 9600);
@@ -207,7 +206,9 @@ void uart_init(uint8_t id)
     uart_set_line(port, 0x03);
     uart_set_fifo(port, 0xC7);
     uart_set_modem(port, 0x0F);
-    // uart_enable_irqs(port);
+
+    if (irq)
+        uart_enable_irqs(port);
 }
 
 void uart_write(uint8_t id, uint8_t ch)

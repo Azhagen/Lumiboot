@@ -2,4 +2,4 @@
 
 #include <stdint.h>
 
-void pmode_memcpy(gdt_ptr_t __far* gdtptr, uint16_t count);
+void pmode_memcpy(uint16_t count);
