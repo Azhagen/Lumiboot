@@ -18,8 +18,8 @@ void print_screen(void)
         for (uint8_t x = 0; x < bda->screen_width; ++x)
         {
             character_t ch = {};
-            bios_video_set_cursor_pos(0, x, y);
-            bios_video_read_at_cursor(0, &ch);
+            bios_move_cursor(0, x, y);
+            bios_read_at_cursor(0, &ch);
             lpt_print(lpt, ch.ch);
         }
 
