@@ -444,6 +444,7 @@ void setup_boot(void)
     setup_status_t update = {};
     update.refresh = true;
     uint8_t entries = 0;
+    uint8_t id = 0;
 
     ebda_t __far* ebda = get_ebda();
 
