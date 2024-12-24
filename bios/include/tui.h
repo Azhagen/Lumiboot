@@ -10,9 +10,8 @@
 #define ALIGN_RIGHT     0x02
 
 #define BORDER_OMIT     0x00
-#define BORDER_THIN     0x01
-#define BORDER_LARGE    0x02
-#define BORDER_SIMPLE   0x04
+#define BORDER_LARGE    0x01
+#define BORDER_SIMPLE   0x02
 
 #define COLOR_BLACK     0x00
 #define COLOR_BLUE      0x01
@@ -41,31 +40,35 @@ typedef struct
 
 extern const logo lumilogo;
 
-void tui_text(uint8_t x, uint8_t y, const char __far* str, uint8_t attr);
-void tui_textbox(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
+static inline uint8_t make_attr(uint8_t fg, uint8_t bg)
+{
+    return (bg << 4) | fg;
+}
+
+void draw_text(uint8_t x, uint8_t y, const char __far* str, uint8_t attr);
+void draw_textbox(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
     const char __far* str, size_t size, uint8_t attr, uint8_t border, uint8_t align);
 
 void tui_image(uint8_t x, uint8_t y, const logo __far* img);
 void tui_clear(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
 
-void tui_border(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t fg_attr,
-    uint8_t bg_attr, uint8_t border, uint8_t align);
+void draw_border(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
+    uint8_t attr, uint8_t border);
 
-void tui_menubar(uint8_t x, uint8_t y, uint8_t w, uint8_t count,
+void draw_tabs(uint8_t x, uint8_t y, uint8_t w, uint8_t count,
     uint8_t selected, uint8_t attr, uint8_t hi_attr, const char* const items[]);
 
-void tui_fill(uint8_t x, uint8_t y, uint8_t w,
+void fill_region(uint8_t x, uint8_t y, uint8_t w,
     uint8_t h, uint8_t c, uint8_t fg, uint8_t bg);
 
 void tui_menulist(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
     uint8_t attr, uint8_t hi_attr, uint8_t selected,
     uint8_t count, const char* const items[]);
 
-void tui_horizontal_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t attr);
-
-void tui_text_item(uint8_t x, uint8_t y, uint16_t len, const char __far* item,
+void draw_horizontal_line(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t attr);
+void draw_key_value(uint8_t x, uint8_t y, uint16_t len, const char __far* item,
     const char __far* value, uint8_t attr, uint8_t hi_attr, bool selected);
 
-void tui_itemlist(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
-    uint8_t attr, uint8_t hi_attr, uint8_t selected, uint8_t count,
-    const char* const items[]);
+// void tui_itemlist(uint8_t x, uint8_t y, uint8_t w, uint8_t h,
+//     uint8_t attr, uint8_t hi_attr, uint8_t selected, uint8_t count,
+//     const char* const items[]);
