@@ -31,10 +31,9 @@ interrupt_08h:
 
     addw [BDA_TILO], 1
     adcw [BDA_TIHI], 0
-    cmpw [BDA_TIHI], 24
+    cmpw [BDA_TIHI], 0x18
     jb   fdc_timer_dec
 
-pit_timer_add:
     cmpw [BDA_TILO], 0xB0
     jb   fdc_timer_dec
 
