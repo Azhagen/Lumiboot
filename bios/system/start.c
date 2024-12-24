@@ -230,7 +230,9 @@ void ebda_init(void)
 
 void bios_init(void)
 {
+    // Early initialization
     bda_init();
+    cmos_init();
 
     debug_set_output(DBG_COM1);
     debug_init();
