@@ -2,6 +2,7 @@
 
 #include "system/data.h"
 
+#include "drivers.h"
 #include "debug.h"
 #include "edd.h"
 
@@ -174,10 +175,9 @@ static void floppy_params(registers_t __seg_ss* const regs)
     regs->bx = 0;
     regs->ax = 0;
     regs->dl = block_floppy_count();
-
-    pointer ptr = (pointer)(void __far*)dkpt;
     regs->es = ptr.seg;
     regs->di = ptr.off;
+    result   = 0x00;
 
 end:
     regs->ah = result;
