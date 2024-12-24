@@ -22,7 +22,7 @@ void bios_video_set_mode(uint8_t mode)
     int10h_call(&regs);
 }
 
-void bios_video_set_cursor_type(uint8_t start, uint8_t end)
+void bios_set_cursor_type(uint8_t start, uint8_t end)
 {
     bioscall regs = {0};
     regs.ah = 0x01;
@@ -31,7 +31,7 @@ void bios_video_set_cursor_type(uint8_t start, uint8_t end)
     int10h_call(&regs);
 }
 
-void bios_video_set_cursor_pos(uint8_t page, uint8_t x, uint8_t y)
+void bios_move_cursor(uint8_t page, uint8_t x, uint8_t y)
 {
     bioscall regs = {0};
     regs.ah = 0x02;
@@ -41,7 +41,7 @@ void bios_video_set_cursor_pos(uint8_t page, uint8_t x, uint8_t y)
     int10h_call(&regs);
 }
 
-void bios_video_write_char_tty(uint8_t ch, uint8_t page, uint8_t attr)
+void bios_write_char_tty(uint8_t ch, uint8_t page, uint8_t attr)
 {
     bioscall regs = {0};
     regs.ah = 0x0E;
@@ -51,7 +51,7 @@ void bios_video_write_char_tty(uint8_t ch, uint8_t page, uint8_t attr)
     int10h_call(&regs);
 }
 
-void bios_video_write_char_attr(uint8_t ch, uint8_t page,
+void bios_write_char_attr(uint8_t ch, uint8_t page,
     uint8_t attr, uint16_t count)
 {
     bioscall regs = {0};
@@ -64,7 +64,7 @@ void bios_video_write_char_attr(uint8_t ch, uint8_t page,
 }
 
 
-void bios_video_read_at_cursor(uint8_t page, character_t __far* ch)
+void bios_read_at_cursor(uint8_t page, character_t __far* ch)
 {
     bioscall regs = {0};
     regs.ah = 0x08;
@@ -73,7 +73,7 @@ void bios_video_read_at_cursor(uint8_t page, character_t __far* ch)
     *ch     = *(character_t __far*)&regs.ax;
 }
 
-void bios_video_scroll_wnd_down(uint8_t lines, uint8_t attr,
+void bios_scroll_wnd_down(uint8_t lines, uint8_t attr,
     uint8_t x0,  uint8_t x1, uint8_t y0, uint8_t y1)
 {
     bioscall regs = {0};
