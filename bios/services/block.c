@@ -169,10 +169,20 @@ static void floppy_params(registers_t __seg_ss* const regs)
 
     // TODO: implement this properly
     dkpt_t __far* dkpt = &blk->dkpt;
-    regs->ch = dkpt->track_count;
-    regs->cl = dkpt->sector_count;
-    regs->dh = dkpt->head_count;
-    regs->bx = 0;
+    pointer ptr = (pointer)(void __far*)dkpt;
+    uint8_t type = 0;
+
+    switch (blk->sub)
+    {
+        case 0: type = (cmos_read(0x10) & 0xF0) >> 4; break;
+        case 1: type = (cmos_read(0x10) & 0x0F) >> 0; break;
+        default: break;
+    }
+
+    regs->ch = (uint8_t)blk->geom.cylinders;
+    regs->cl = (uint8_t)blk->geom.sectors;
+    regs->dh = (uint8_t)blk->geom.heads;
+    regs->bx = type;
     regs->ax = 0;
     regs->dl = block_floppy_count();
     regs->es = ptr.seg;
