@@ -172,6 +172,8 @@ struct __packed extended_bios_data_area
     uint32_t    size;
     block_t     block_table[32];
     uint8_t     buffer[2048];
+    uint8_t     gdb_buffer[2048];
+    // uint8_t     gdb_buf1[1024];
     // boot_entry_t boot_table[16];
     // uint16_t     boot_device;
     // uint8_t      is_emulating;  // TODO: should be in a flag field
