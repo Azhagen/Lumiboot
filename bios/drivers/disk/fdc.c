@@ -408,8 +408,6 @@ uint8_t fdc_check_media(block_t __far* blk)
 uint8_t fdc_read_chs(block_t __far* blk, geometry_t __seg_ss* chs,
     uint16_t count, void __far* buffer)
 {
-    debug_out("[BIOS] FDC: Reading %d sectors, at %u:%u:%u\n\r",
-        count, chs->cylinders, chs->heads, chs->sectors);
     return fdc_cmd_rwv(blk, chs, count, buffer, FDC_CMD_READ_SECT |
         FDC_CMD_EXT_MULTITRACK | FDC_CMD_EXT_DENSITY, DMA_READ_CH2);
 }
