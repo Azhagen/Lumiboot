@@ -45,12 +45,12 @@ void splash_screen(void)
 {
     tui_image(20, 7, &lumilogo);
 
-    tui_text(40 - sizeof(version) / 2, 12, version, 0x07);
-    tui_text(40 - sizeof(copyright) / 2, 13, copyright, 0x07);
-    tui_text(40 - sizeof(license) / 2, 14, license, 0x07);
+    draw_text(40 - sizeof(version) / 2, 12, version, 0x07);
+    draw_text(40 - sizeof(copyright) / 2, 13, copyright, 0x07);
+    draw_text(40 - sizeof(license) / 2, 14, license, 0x07);
 
-    tui_text(40 - sizeof(option_2) / 2, 17, option_1, 0x07);
-    tui_text(40 - sizeof(option_2) / 2, 18, option_2, 0x07);
+    draw_text(40 - sizeof(option_2) / 2, 17, option_1, 0x07);
+    draw_text(40 - sizeof(option_2) / 2, 18, option_2, 0x07);
 
     if (pit_wait_until(5000, setup_wait_key))
     {
@@ -190,7 +190,7 @@ void boot_disk(uint8_t drive)
     debug_puts("[BIOS] Found boot disk\n\r");
 
     bios_video_set_mode(0x03);
-    bios_video_set_cursor_pos(0, 0, 0);
+    bios_move_cursor(0, 0, 0);
 
     boot_start(drive);
 }
