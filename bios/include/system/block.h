@@ -113,7 +113,6 @@ struct __packed diskette_parameter_table
     uint8_t track_count;
     uint8_t data_rate;
     uint8_t drive_type;
-    uint8_t head_count;
 };
 
 struct __packed block
@@ -156,6 +155,7 @@ bool block_remove(uint8_t id);
 bool block_insert(block_t __far* blk);
 
 uint8_t block_generate_fdpt(block_t __far* blk);
+uint8_t block_generate_dkpt(block_t __far* blk);
 
 bool block_translate_none(fdpt_t __far* fdpt, geometry_t geom);
 bool block_translate_chs(fdpt_t __far* fdpt, geometry_t geom);

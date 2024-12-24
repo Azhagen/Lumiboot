@@ -178,7 +178,8 @@ uint8_t block_create(uint8_t type, uint8_t sub, uint8_t flags, uint64_t lba,
     }
     else
     {
-        
+        if (block_generate_dkpt(&blk) != BLOCK_SUCCESS)
+            return false;
     }
 
     if (!block_insert(&blk))
@@ -357,6 +358,45 @@ bool block_translate_lba(fdpt_t __far* fdpt, geometry_t geom, uint64_t lba)
     //     fdpt->logical_cylinders, fdpt->logical_heads, fdpt->logical_sectors);
 
     return true;
+}
+
+static geometry_t geoms[] =
+{
+    { 40, 2, 9  },
+    { 80, 2, 15 },
+    { 80, 2, 9  },
+    { 80, 2, 18 },
+    { 80, 2, 36 }
+};
+
+static dkpt_t dkpts[] =
+{
+    // 360 KB (5.25-inch)
+    { 0xDF, 0x02, 0x20, 0x02, 0x09, 0x2A, 0xFF, 0x50, 0xF6, 0x50, 0x02, 40, 0x01, 0x01 },
+    // 720 KB (3.5-inch)
+    { 0xDF, 0x02, 0x20, 0x02, 0x09, 0x2A, 0xFF, 0x50, 0xF6, 0x50, 0x02, 80, 0x02, 0x03 },
+    // 1.2 MB (5.25-inch)
+    { 0xDF, 0x01, 0x20, 0x02, 0x0F, 0x1B, 0xFF, 0x54, 0xF6, 0x50, 0x02, 80, 0x00, 0x02 },
+    // 1.44 MB (3.5-inch)
+    { 0xCF, 0x02, 0x20, 0x02, 0x12, 0x1B, 0xFF, 0x6C, 0xF6, 0x50, 0x02, 80, 0x00, 0x04 },
+    // 2.88 MB (3.5-inch)
+    { 0xAF, 0x02, 0x37, 0x02, 0x24, 0x1B, 0xFF, 0x6C, 0xF6, 0x50, 0x02, 80, 0x03, 0x05 },
+};
+
+uint8_t block_generate_dkpt(block_t __far* blk)
+{
+    for (uint8_t i = 0; i < array_size(geoms); ++i)
+    {
+        if (blk->geom.cylinders != geoms[i].cylinders ||
+            blk->geom.heads != geoms[i].heads ||
+            blk->geom.sectors != geoms[i].sectors)
+            continue;
+
+        blk->dkpt = dkpts[i];
+        return BLOCK_SUCCESS;
+    }
+
+    return BLOCK_ERROR;
 }
 
 // bool block_find_fdpt(uint8_t id, fdpt_t __far*__far* fdpt)
