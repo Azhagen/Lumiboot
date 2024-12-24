@@ -3,8 +3,7 @@
 #include <stdint.h>
 #include "attrib.h"
 
-// #undef NDEBUG
-
+#include "debug/gdbstub.h"
 
 enum debug_device
 {

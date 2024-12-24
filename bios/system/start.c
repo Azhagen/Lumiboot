@@ -240,20 +240,20 @@ void bios_init(void)
     sys_detect();
     mem_detect();
 
-    ebda_init();
-
     // Install interrupts vectors
     interrupt_install_all();
 
-    // Device initialization
+    // Initialization
+    ebda_init();
+#ifdef GDB_DEBUG
+    gdb_init();
+#endif
     kbd_init();
     pic_init();
     dma_init();
     pit_init();
-    rom_init();
-
-    // TODO: support addon rtc on xt machines
     // rtc_init();
+    rom_init();
 
     irq_enable();
     pic_enable_all();

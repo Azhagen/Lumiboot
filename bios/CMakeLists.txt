@@ -75,6 +75,9 @@ target_sources(${PROJECT}
     "drivers/audio/spk.c"
 
     "debug/debug.c"
+    "debug/gdbstub.c"
+    "debug/interrupt_0Bh.S"
+    "debug/interrupt_dbg.S"
 
     "data/video.c"
     "data/keycode.c"
