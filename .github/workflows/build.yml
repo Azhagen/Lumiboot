@@ -23,7 +23,8 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install GCC IA16
-      run: sudo add-apt-repository ppa:tkchia/build-ia16 && sudo apt update && sudo apt install gcc-ia16-elf
+      run: sudo add-apt-repository ppa:tkchia/build-ia16 && sudo apt update &&
+        sudo apt install gcc-ia16-elf && sudo apt install ninja-build
 
     - name: Configure CMake
       run: cmake --preset "IBM 5170"
