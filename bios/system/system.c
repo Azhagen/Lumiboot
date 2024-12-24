@@ -20,6 +20,26 @@ void irq_disable(void)
     asm volatile ("cli" ::: "memory");
 }
 
+void idt_load(idt_ptr_t __far* idtptr)
+{
+    asm volatile ("lidt %0" :: "m"(*idtptr) : "memory");
+}
+
+void gdt_load(gdt_ptr_t __far* gdtptr)
+{
+    asm volatile ("lgdt %0" :: "m"(*gdtptr) : "memory");
+}
+
+void idt_store(idt_ptr_t __far* idtptr)
+{
+    asm volatile ("sidt %0" : "=m"(*idtptr) :: "memory");
+}
+
+void gdt_store(gdt_ptr_t __far* gdtptr)
+{
+    asm volatile ("sgdt %0" : "=m"(*gdtptr) :: "memory");
+}
+
 noreturn void unreachable(void)
 {
     __builtin_unreachable();
