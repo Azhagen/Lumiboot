@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "attrib.h"
 
 struct time
@@ -32,6 +33,11 @@ void cmos_read_date(date_t __far* const date);
 
 void cmos_write_time(const time_t __far* const time);
 void cmos_write_date(const date_t __far* const date);
+
+void cmos_init(void);
+bool cmos_checksum_valid(void);
+void cmos_checksum_compute(void);
+
 
 // void cmos_read_alarm(time_t __seg_ss* const time);
 // void cmos_write_alarm(const time_t __seg_ss* const time);

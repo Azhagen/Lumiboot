@@ -114,3 +114,35 @@ void cmos_write_date(const date_t __far* const date)
         cmos_write(0x09, binary_to_bcd(date->year));
     }
 }
+
+void cmos_init(void)
+{
+    if (cmos_checksum_valid())
+        return;
+
+    for (uint8_t i = 0x10; i < 0x3F; ++i)
+        cmos_write(i, 0);
+
+    cmos_checksum_compute();
+}
+
+bool cmos_checksum_valid(void)
+{
+    uint16_t checksum = 0;
+    for (uint8_t i = 0x10; i < 0x2D; ++i)
+        checksum += cmos_read(i);
+
+    uint16_t cmos = as_uint16(cmos_read(0x2E), cmos_read(0x2F));
+
+    return checksum == cmos;
+}
+
+void cmos_checksum_compute(void)
+{
+    uint16_t checksum = 0;
+    for (uint8_t i = 0x10; i < 0x2D; ++i)
+        checksum += cmos_read(i);
+
+    cmos_write(0x2E, hi(checksum));
+    cmos_write(0x2F, lo(checksum));
+}
