@@ -193,7 +193,7 @@ static bool uart_detect_presence(uint16_t port)
     return !(irr & 0xF0);
 }
 
-void uart_init(uint8_t id, bool irq)
+void uart_init(uint8_t id, uint32_t baudrate, bool irq)
 {
     if (id >= SERIAL_COUNT)
         return;
@@ -201,8 +201,7 @@ void uart_init(uint8_t id, bool irq)
     uint16_t port = serial_ports[id];
 
     uart_disable_irqs(port);
-    // uart_set_baud(port, 9600);
-    uart_set_baud(port, 115200L);
+    uart_set_baud(port, baudrate);
     uart_set_line(port, 0x03);
     uart_set_fifo(port, 0xC7);
     uart_set_modem(port, 0x0F);

@@ -16,6 +16,6 @@ bool uart_is_receive_ready(uint16_t port);
 uint8_t uart_line_status(uint16_t port);
 uint8_t uart_modem_status(uint16_t port);
 
-void uart_init(uint8_t id);
+void uart_init(uint8_t id, uint32_t baudrate, bool irq);
 void uart_write(uint8_t id, uint8_t ch);
 uint8_t uart_read(uint8_t id);

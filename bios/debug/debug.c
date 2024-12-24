@@ -21,18 +21,20 @@ void debug_init(void)
     // uart_init(1);
     // debug_puts("\033[2J\033[1;1H");
 
+    uint32_t baudrate = 115200L;
+
     switch (bda->debug_device)
     {
         // case DBG_MDA:  debug_gfx_init(); break;
-        case DBG_COM1: uart_init(0);
+        case DBG_COM1: uart_init(0, baudrate, false);
             // debug_puts("\n\r"); break;
             debug_puts("\033[2J\033[1;1H"); break;
-        case DBG_COM2: uart_init(1);
+        case DBG_COM2: uart_init(1, baudrate, false);
             // debug_puts("\n\r"); break;
             debug_puts("\033[2J\033[1;1H"); break;
-        case DBG_COM3: uart_init(2);
+        case DBG_COM3: uart_init(2, baudrate, false);
             debug_puts("\033[2J\033[1;1H"); break;
-        case DBG_COM4: uart_init(3);
+        case DBG_COM4: uart_init(3, baudrate, false);
             debug_puts("\033[2J\033[1;1H"); break;
         case DBG_0xE9: break;
 
