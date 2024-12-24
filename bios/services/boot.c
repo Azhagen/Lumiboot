@@ -44,7 +44,7 @@
 //     debug_puts("[BIOS] Found boot disk...\n\r");
 
 //     bios_video_set_mode(0x03);
-//     bios_video_set_cursor_pos(0, 0, 0);
+//     bios_move_cursor(0, 0, 0);
 
 //     boot_start(0);
 //     */

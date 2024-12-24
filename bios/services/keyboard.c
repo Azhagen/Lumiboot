@@ -52,7 +52,7 @@ void keyboard_push_key(void)
     pic_send_eoi(1);
 }
 
-void keyboard_handler(intregs __seg_ss* const regs)
+void keyboard_handler(registers_t __seg_ss* const regs)
 {
     switch (regs->ah)
     {
@@ -69,23 +69,23 @@ void keyboard_handler(intregs __seg_ss* const regs)
     }
 }
 
-void keyboard_read_key(intregs __seg_ss* const regs)
+void keyboard_read_key(registers_t __seg_ss* const regs)
 {
     regs->ax = read_code();
 }
 
-void keyboard_peek_key(intregs __seg_ss* const regs)
+void keyboard_peek_key(registers_t __seg_ss* const regs)
 {
     regs->ax = peek_code();
     regs->ZF = regs->ax == 0;
 }
 
-void keyboard_get_flags(intregs __seg_ss* const regs)
+void keyboard_get_flags(registers_t __seg_ss* const regs)
 {
     regs->al = lo(bda->keyboard_flags);
 }
 
-void keyboard_set_bits(intregs __seg_ss* const regs)
+void keyboard_set_bits(registers_t __seg_ss* const regs)
 {
     if (regs->al != 0x05)
         return;
@@ -96,22 +96,22 @@ void keyboard_set_bits(intregs __seg_ss* const regs)
     kbd_set_typematic(rate | delay);
 }
 
-void keyboard_store_key(intregs __seg_ss* const regs)
+void keyboard_store_key(registers_t __seg_ss* const regs)
 {
     regs->al = store_code(regs->cx);
 }
 
-void keyboard_ext_read_key(intregs __seg_ss* const regs)
+void keyboard_ext_read_key(registers_t __seg_ss* const regs)
 {
     keyboard_read_key(regs);
 }
 
-void keyboard_ext_peek_key(intregs __seg_ss* const regs)
+void keyboard_ext_peek_key(registers_t __seg_ss* const regs)
 {
     keyboard_peek_key(regs);
 }
 
-void keyboard_ext_get_flags(intregs __seg_ss* const regs)
+void keyboard_ext_get_flags(registers_t __seg_ss* const regs)
 {
     keyboard_get_flags(regs);
 }

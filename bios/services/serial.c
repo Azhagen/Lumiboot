@@ -13,7 +13,7 @@ static const uint16_t baud_rate[] =
 static bool is_receive_ready(uint8_t port);
 static bool is_transmit_ready(uint8_t port);
 
-void serial_handler(intregs __seg_ss* const regs)
+void serial_handler(registers_t __seg_ss* const regs)
 {
     switch (regs->ah)
     {
@@ -24,7 +24,7 @@ void serial_handler(intregs __seg_ss* const regs)
     }
 }
 
-void serial_initialize(intregs __seg_ss* const regs)
+void serial_initialize(registers_t __seg_ss* const regs)
 {
     uint8_t port  = lo(regs->dx);
     uint8_t value = regs->al;
@@ -44,7 +44,7 @@ void serial_initialize(intregs __seg_ss* const regs)
     regs->al = uart_modem_status(uart);
 }
 
-void serial_transmit(intregs __seg_ss* const regs)
+void serial_transmit(registers_t __seg_ss* const regs)
 {
     uint8_t port  = lo(regs->dx);
     uint8_t value = regs->al;
@@ -63,7 +63,7 @@ void serial_transmit(intregs __seg_ss* const regs)
     regs->ah = uart_line_status(uart);
 }
 
-void serial_receive(intregs __seg_ss* const regs)
+void serial_receive(registers_t __seg_ss* const regs)
 {
     uint8_t port = lo(regs->dx);
 
@@ -81,7 +81,7 @@ void serial_receive(intregs __seg_ss* const regs)
     regs->ah = uart_line_status(uart);
 }
 
-void serial_status(intregs __seg_ss* const regs)
+void serial_status(registers_t __seg_ss* const regs)
 {
     uint8_t port = lo(regs->dx);
 

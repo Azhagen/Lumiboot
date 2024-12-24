@@ -1,5 +1,4 @@
 #include "services/block.h"
-
 #include "system/data.h"
 
 #include "drivers.h"
@@ -225,35 +224,6 @@ void block_params(registers_t __seg_ss* const regs)
         floppy_params(regs);
     else
         disk_params(regs);
-
-//     block_t __far* blk = 0;
-//     uint8_t result = 0x01;
-
-//     if (!block_find(regs->dl, &blk))
-//         goto end;
-
-//     if (blk->type == BLOCK_TYPE_ATAPI)
-//         goto end;
-
-//     fdpt_t __far* fdpt = &blk->fdpt;
-
-//     uint16_t cylinders = (uint16_t)fdpt->logical_cylinders;
-//     uint16_t heads     = (uint16_t)fdpt->logical_heads;
-//     uint16_t sectors   = (uint16_t)fdpt->logical_sectors;
-
-//     regs->ch = (uint8_t)(cylinders);
-//     regs->cl = (uint8_t)(((cylinders >> 2) & 0xC0) | (sectors & 0x3F));
-//     regs->dh = (uint8_t)(heads);
-//     regs->dl = block_disk_count();
-    
-//     pointer ptr = (pointer)(void __far*)fdpt;
-//     regs->es = ptr.seg;
-//     regs->bx = ptr.off;
-//     result   = 0x00;
-
-// end:
-//     regs->ah = result;
-//     regs->CF = result != 0x00;
 }
 
 void block_type(registers_t __seg_ss* const regs)
@@ -300,8 +270,6 @@ void block_change(registers_t __seg_ss* const regs)
     command_t cmd = {};
     cmd.cmd = BLOCK_CMD_CHANGE;
     result  = blk->send_cmd(blk, &cmd);
-
-    debug_out("[BIOS] Change media: %x\n\r", result);
 
 end:
     regs->ah = result;

@@ -2,8 +2,9 @@
 #include "system/data.h"
 
 #include "drivers.h"
+#include "debug.h"
 
-void time_handler(time_regs __seg_ss* const regs)
+void time_handler(registers_t __seg_ss* const regs)
 {
     switch (regs->ah)
     {
@@ -20,32 +21,26 @@ void time_handler(time_regs __seg_ss* const regs)
     }
 }
 
-void time_read_clock(time_regs __seg_ss* const regs)
+void time_read_clock(registers_t __seg_ss* const regs)
 {
     regs->cx = bda->timer_hi;
     regs->dx = bda->timer_lo;
     regs->al = bda->timer_of;
-    
     bda->timer_of = 0;
-    
     regs->CF = 0;
 }
 
-void time_write_clock(time_regs __seg_ss* const regs)
+void time_write_clock(registers_t __seg_ss* const regs)
 {
     bda->timer_hi = regs->cx;
     bda->timer_lo = regs->dx;
     bda->timer_of = 0;
-
     regs->CF = 0;
 }
 
-void time_read_time(time_regs __seg_ss* const regs)
+void time_read_time(registers_t __seg_ss* const regs)
 {
-    regs->CF = 1;
-
-    if (cmos_read(0x0A) & 0x80)
-        return;
+    while (cmos_read(0x0A) & 0x80);
 
     uint8_t seconds = cmos_read(0x00);
     uint8_t minutes = cmos_read(0x02);
@@ -68,7 +63,7 @@ void time_read_time(time_regs __seg_ss* const regs)
     regs->CF = 0;
 }
 
-void time_write_time(time_regs __seg_ss* const regs)
+void time_write_time(registers_t __seg_ss* const regs)
 {
     regs->CF = 1;
 
@@ -94,12 +89,9 @@ void time_write_time(time_regs __seg_ss* const regs)
     regs->CF = 0;
 }
 
-void time_read_date(time_regs __seg_ss* const regs)
+void time_read_date(registers_t __seg_ss* const regs)
 {
-    regs->CF = 1;
-
-    if (cmos_read(0x0A) & 0x80)
-        return;
+    while (cmos_read(0x0A) & 0x80);
 
     uint8_t day     = cmos_read(0x07);
     uint8_t month   = cmos_read(0x08);
@@ -122,7 +114,7 @@ void time_read_date(time_regs __seg_ss* const regs)
     regs->CF = 0;
 }
 
-void time_write_date(time_regs __seg_ss* const regs)
+void time_write_date(registers_t __seg_ss* const regs)
 {
     regs->CF = 1;
 
@@ -148,7 +140,7 @@ void time_write_date(time_regs __seg_ss* const regs)
     regs->CF = 0;
 }
 
-void time_set_alarm(time_regs __seg_ss* const regs)
+void time_set_alarm(registers_t __seg_ss* const regs)
 {
     uint8_t seconds = regs->dh;
     uint8_t minutes = regs->cl;
@@ -169,7 +161,7 @@ void time_set_alarm(time_regs __seg_ss* const regs)
     cmos_enable_nmi();
 }
 
-void time_reset_alarm(time_regs __seg_ss* const regs)
+void time_reset_alarm(registers_t __seg_ss* const regs)
 {
     (void) regs;
     cmos_write(0x0B, cmos_read(0x0B) & 0xDF);

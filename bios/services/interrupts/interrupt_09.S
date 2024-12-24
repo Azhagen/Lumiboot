@@ -1,5 +1,4 @@
 .code16
-.arch i8086
 .intel_syntax noprefix
 
 #define BDA_SEG  0x40
@@ -10,24 +9,18 @@
 .global interrupt_09h
 .type   interrupt_09h, @function
 interrupt_09h:
+    pusha
+    push es
     push ds
-    push di
+    pushf
 
     mov  di, 0xF000
     mov  ds, di
-
-    push ax
-    push bx
-    push cx
-    push dx
-
     call keyboard_push_key
 
-    pop  dx
-    pop  cx
-    pop  bx
-    pop  ax
-
-    pop  di
+    popf
     pop  ds
+    pop  es
+    popa
+
     iret

@@ -12,7 +12,7 @@
 #include "system/gdt.h"
 #include "system/pmode.h"
 
-void system_handler(bioscall __seg_ss* const regs)
+void system_handler(registers_t __seg_ss* const regs)
 {
     switch (regs->ah)
     {
@@ -40,30 +40,30 @@ void system_handler(bioscall __seg_ss* const regs)
     }
 }
 
-void system_kbd_intercept(bioscall __seg_ss* const regs)
+void system_kbd_intercept(registers_t __seg_ss* const regs)
 {
     regs->CF = 0;
 }
 
-void system_device_open(bioscall __seg_ss* const regs)
-{
-    regs->ah = 0;
-    regs->CF = 0;
-}
-
-void system_device_close(bioscall __seg_ss* const regs)
+void system_device_open(registers_t __seg_ss* const regs)
 {
     regs->ah = 0;
     regs->CF = 0;
 }
 
-void system_program_end(bioscall __seg_ss* const regs)
+void system_device_close(registers_t __seg_ss* const regs)
 {
     regs->ah = 0;
     regs->CF = 0;
 }
 
-void system_async_wait(bioscall __seg_ss* const regs)
+void system_program_end(registers_t __seg_ss* const regs)
+{
+    regs->ah = 0;
+    regs->CF = 0;
+}
+
+void system_async_wait(registers_t __seg_ss* const regs)
 {
     switch (regs->al)
     {
@@ -75,19 +75,19 @@ void system_async_wait(bioscall __seg_ss* const regs)
     }
 }
 
-void sub_wait_interval_set(bioscall __seg_ss* const regs)
+void sub_wait_interval_set(registers_t __seg_ss* const regs)
 {
     (void) regs;
     // TODO: implement
 }
 
-void sub_wait_interval_cancel(bioscall __seg_ss* const regs)
+void sub_wait_interval_cancel(registers_t __seg_ss* const regs)
 {
     (void) regs;
     // TODO: implement
 }
 
-void system_joy_handler(bioscall __seg_ss* const regs)
+void system_joy_handler(registers_t __seg_ss* const regs)
 {
     switch (regs->dx)
     {
@@ -99,25 +99,25 @@ void system_joy_handler(bioscall __seg_ss* const regs)
     }
 }
 
-void sub_joystick_read_settings(bioscall __seg_ss* const regs)
+void sub_joystick_read_settings(registers_t __seg_ss* const regs)
 {
     (void) regs;
     // TODO: implement
 }
 
-void sub_joystick_read_inputs(bioscall __seg_ss* const regs)
+void sub_joystick_read_inputs(registers_t __seg_ss* const regs)
 {
     (void) regs;
     // TODO: implement
 }
 
-void system_request(bioscall __seg_ss* const regs)
+void system_request(registers_t __seg_ss* const regs)
 {
     regs->ah = 0;
     regs->CF = 0;
 }
 
-void system_sync_wait(bioscall __seg_ss* const regs)
+void system_sync_wait(registers_t __seg_ss* const regs)
 {
     uint32_t msecs = as_uint32(regs->cx, regs->dx);
     if (!msecs) return;
@@ -126,7 +126,7 @@ void system_sync_wait(bioscall __seg_ss* const regs)
     regs->CF = 0x01;
 }
 
-void system_move_blocks(bioscall __seg_ss* const regs)
+void system_move_blocks(registers_t __seg_ss* const regs)
 {
     gdt_entry_t __far* gdt = segoff_to_fp(regs->es, regs->si);
 
@@ -159,31 +159,31 @@ void system_move_blocks(bioscall __seg_ss* const regs)
     regs->ZF = 1;
 }
 
-void system_memory_size(bioscall __seg_ss* const regs)
+void system_memory_size(registers_t __seg_ss* const regs)
 {
     uint8_t lo = cmos_read(0x17);
     uint8_t hi = cmos_read(0x18);
     regs->ax = as_uint16(hi, lo);
 }
 
-void system_enter_pmode(bioscall __seg_ss* const regs)
+void system_enter_pmode(registers_t __seg_ss* const regs)
 {
     regs->ah = 0xFF;
     regs->CF = 1;
 }
 
-void system_device_busy(bioscall __seg_ss* const regs)
+void system_device_busy(registers_t __seg_ss* const regs)
 {
     regs->ah = 0;
     regs->CF = 0;
 }
 
-void system_interrupt_end(bioscall __seg_ss* const regs)
+void system_interrupt_end(registers_t __seg_ss* const regs)
 {
     (void) regs;
 }
 
-void system_read_config(bioscall __seg_ss* const regs)
+void system_read_config(registers_t __seg_ss* const regs)
 {
     const pointer ptr = (pointer)(void __far*)&system_config;
     regs->es = ptr.seg;
