@@ -22,6 +22,8 @@ target_sources(${PROJECT}
     "system/data.c"
     "system/system.c"
     "system/block.c"
+    "system/boot.c"
+    "system/boot.S"
     
     "services/interface/video.c"
     "services/interface/disk.c"
@@ -49,7 +51,6 @@ target_sources(${PROJECT}
     "services/interrupts/interrupt_XX.S"
 
     "services/boot.c"
-    "services/boot.S"
     "services/printer.c"
     "services/keyboard.c"
     "services/serial.c"

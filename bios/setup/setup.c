@@ -1,5 +1,6 @@
 #include "setup/setup.h"
 #include "system/data.h"
+#include "system/boot.h"
 
 #include "drivers.h"
 #include "tui.h"
@@ -7,6 +8,7 @@
 #include "string.h"
 
 #include "bios.h"
+#include "debug.h"
 
 #define KEY_LEFT    0x4B
 #define KEY_RIGHT   0x4D
@@ -468,12 +470,7 @@ void setup_boot(void)
                 if (update.selected == entries - 1)
                     return setup_main();
                 else
-                {
-                    // boot_entry_t __far* entry = 0;
-                    // boot_get_entry(update.selected, &entry);
-                    // ebda->boot_device = entry->device_type;
-                    // entry->boot_handler();
-                }
+                    boot_device(id);
                 break;
             case KEY_ESC:
                 return;
@@ -491,7 +488,6 @@ void setup_boot(void)
             if (ebda->block_table[i].type == BLOCK_TYPE_RESERVED)
                 continue;
 
-
             snprintf(ebda->buffer, 30, "Device %02u:", i);
             off = (uint8_t)((80 / 2) - (fstrlen(ebda->buffer) + 32) / 2);
 
@@ -499,16 +495,8 @@ void setup_boot(void)
                 ebda->block_table[i].desc, COLOR_BLACK << 4 | COLOR_LIGHTGRAY,
                 COLOR_LIGHTGRAY << 4 | COLOR_BLACK, update.selected == i);
                 
-            // boot_entry_t __far* entry = 0;
-            // boot_get_entry(i, &entry);
-            // if (entry->device_type == DEV_RESERVED) break;
-
-            // snprintf(ebda->buffer, 30, "Device %02u:", i);
-            // off = (uint8_t)((80 / 2) - (fstrlen(ebda->buffer) + 32) / 2);
-
-            // tui_text_item(off, (uint8_t)(4 + i), 11, ebda->buffer,
-            //     entry->description, COLOR_BLACK << 4 | COLOR_LIGHTGRAY,
-            //     COLOR_LIGHTGRAY << 4 | COLOR_BLACK, update.selected == i);
+            if (update.selected == i)
+                id = ebda->block_table[i].id;
 
             entries++;
         }
