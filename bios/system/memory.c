@@ -122,6 +122,7 @@ static void memory_verify(uint16_t base, uint16_t ext)
 
         cmos_write(0x14, (uint8_t)(base >> 0));
         cmos_write(0x15, (uint8_t)(base >> 8));
+        cmos_checksum_compute();
     }
 
     if (old_ext != ext)
@@ -133,6 +134,7 @@ static void memory_verify(uint16_t base, uint16_t ext)
         cmos_write(0x18, (uint8_t)(ext >> 8));
         cmos_write(0x30, (uint8_t)(ext >> 0));
         cmos_write(0x31, (uint8_t)(ext >> 8));
+        cmos_checksum_compute();
     }
 
     // compute_cmos_checksum();
