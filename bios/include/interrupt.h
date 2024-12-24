@@ -49,6 +49,23 @@ typedef struct bioscall
     FLAGS;
 } bioscall;
 
+struct registers
+{
+    FLAGS;
+    word_t ds;
+    word_t es;
+    word_t di;
+    word_t si;
+    word_t bp;
+    word_t sp;
+    WORD(b);
+    WORD(d);
+    WORD(c);
+    WORD(a);
+};
+
+typedef struct registers registers_t;
+
 struct regs 
 {
     WORD(a);

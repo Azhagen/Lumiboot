@@ -4,21 +4,6 @@
 #include "attrib.h"
 #include "interrupt.h"
 
-struct __packed registers
-{
-    WORD(a);
-    WORD(b);
-    WORD(c);
-    WORD(d);
-    word_t di;
-    word_t si;
-    word_t es;
-    word_t ds;
-    FLAGS;
-};
-
-typedef struct registers registers_t;
-
 void block_reset(registers_t __seg_ss* const regs);
 void block_status(registers_t __seg_ss* const regs);
 void block_read(registers_t __seg_ss* const regs);

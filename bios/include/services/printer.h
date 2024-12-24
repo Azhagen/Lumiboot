@@ -6,6 +6,6 @@
 
 // INT 17
 
-void printer_send(bioscall __seg_ss* const regs);
-void printer_init(bioscall __seg_ss* const regs);
-void printer_status(bioscall __seg_ss* const regs);
+void printer_send(registers_t __seg_ss* const regs);
+void printer_init(registers_t __seg_ss* const regs);
+void printer_status(registers_t __seg_ss* const regs);
