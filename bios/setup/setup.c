@@ -40,13 +40,14 @@ static const char *const setup_menu[] =
     "Exit"
 };
 
-static const char *const boot_menu[] =
+static const char *const setup_floppy[] =
 {
-    "Floppy",
-    "Hard Drive",
-    "CD-ROM",
-    "Network",
-    "Exit"
+    "None       ",
+    "5.25\" 360KB",
+    "5.25\" 1.2MB",
+    "3.5\"  720KB",
+    "3.5\" 1.44MB",
+    "3.5\" 2.88MB",
 };
 
 static const char *const setup_banner = "Lumiboot Setup Utility - Copyright (C) 2024 Azhagen";
@@ -117,19 +118,19 @@ static void display_date_menu(date_t __far* date, setup_status_t __far* status)
 {
     char __far* str = (char __far*)get_ebda()->buffer;
 
-    tui_text(2, 3, "Set System Date", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
-    tui_horizontal_line(2, 4, 49, 4, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
+    draw_text(2, 3, "Set System Date", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
+    draw_horizontal_line(2, 4, 49, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
 
     snprintf(str, 16, "[%02u]", date->day);
-    tui_text_item(2, 6, 30, "Day:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 6, 30, "Day:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
 
     snprintf(str, 16, "[%02u]", date->month);
-    tui_text_item(2, 7, 30, "Month:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 7, 30, "Month:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 
     snprintf(str, 16, "[%02u]", date->year);
-    tui_text_item(2, 8, 30, "Year:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 8, 30, "Year:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 2);
 }
 
@@ -137,19 +138,19 @@ static void display_time_menu(time_t __far* time, setup_status_t __far* status)
 {
     char __far* str = (char __far*)get_ebda()->buffer;
 
-    tui_text(2, 3, "Set System Time", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
-    tui_horizontal_line(2, 4, 49, 4, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
+    draw_text(2, 3, "Set System Time", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
+    draw_horizontal_line(2, 4, 49, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
 
     snprintf(str, 16, "[%02u]", time->hour);
-    tui_text_item(2, 6, 30, "Hours:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 6, 30, "Hours:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
 
     snprintf(str, 16, "[%02u]", time->minute);
-    tui_text_item(2, 7, 30, "Minutes:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 7, 30, "Minutes:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 
     snprintf(str, 16, "[%02u]", time->second);
-    tui_text_item(2, 8, 30, "Seconds:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 8, 30, "Seconds:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 2);
 }
 
@@ -163,13 +164,13 @@ static void setup_read_key(setup_status_t __seg_ss* status)
 
 static void setup_draw_background(uint8_t selected)
 {
-    tui_fill(0, 2, 80, 25, ' ', COLOR_BLACK, COLOR_LIGHTGRAY);
-    tui_border(0, 2, 80, 23, COLOR_BLUE, COLOR_LIGHTGRAY, BORDER_LARGE, ALIGN_LEFT);
-    tui_border(50, 2, 30, 23, COLOR_BLUE, COLOR_LIGHTGRAY, BORDER_LARGE, ALIGN_LEFT);
+    fill_region(0, 2, 80, 25, ' ', COLOR_BLACK, COLOR_LIGHTGRAY);
+    draw_border(0, 2, 80, 23, make_attr(COLOR_BLUE, COLOR_LIGHTGRAY), BORDER_LARGE);
+    draw_border(50, 2, 30, 23, make_attr(COLOR_BLUE, COLOR_LIGHTGRAY), BORDER_LARGE);
 
-    tui_menubar(0, 0, 80, 1, 0, COLOR_CYAN << 4 | COLOR_BLACK,
+    draw_tabs(0, 0, 80, 1, 0, COLOR_CYAN << 4 | COLOR_BLACK,
         COLOR_CYAN << 4 | COLOR_BLACK, &setup_banner);
-    tui_menubar(0, 1, 80, array_size(setup_menu), selected,
+    draw_tabs(0, 1, 80, array_size(setup_menu), selected,
         COLOR_BLUE << 4 | COLOR_LIGHTGRAY, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, setup_menu);
 }
 
@@ -256,7 +257,7 @@ static void setup_set_lang(setup_status_t __seg_ss* status)
         default: break;
     }
 
-    tui_text(2, 5, "No other language available", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
+    draw_text(2, 5, "No other language available", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
 }
 
 static void setup_show_system(setup_status_t __seg_ss* status)
@@ -301,11 +302,11 @@ static void setup_show_system(setup_status_t __seg_ss* status)
     if (refresh_time)
     {
         snprintf(str, 16, "[%02u:%02u:%02u]", time.hour, time.minute, time.second);
-        tui_text_item(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+        draw_key_value(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
 
         snprintf(str, 16, "[%02u/%02u/%02u]", date.day, date.month, date.year);
-        tui_text_item(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+        draw_key_value(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 
         // BUG: gcc complain with: unable to find a register to spill
@@ -320,14 +321,14 @@ static void setup_show_system(setup_status_t __seg_ss* status)
     if (refresh_selectable)
     {
         snprintf(str, 16, "[%02u:%02u:%02u]", time.hour, time.minute, time.second);
-        tui_text_item(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+        draw_key_value(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
 
         snprintf(str, 16, "[%02u/%02u/%02u]", date.day, date.month, date.year);
-        tui_text_item(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+        draw_key_value(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 
-        tui_text_item(2, 20, 30, "Language:", "[English]", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+        draw_key_value(2, 20, 30, "Language:", "[English]", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 2);
     }
 
@@ -335,52 +336,100 @@ static void setup_show_system(setup_status_t __seg_ss* status)
         return;
 
     snprintf(str, 16, "[%02u:%02u:%02u]", time.hour, time.minute, time.second);
-    tui_text_item(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 9, 30, "Time:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
 
     snprintf(str, 16, "[%02u/%02u/%02u]", date.day, date.month, date.year);
-    tui_text_item(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+    draw_key_value(2, 10, 30, "Date:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 
-    tui_text_item(2, 20, 30, "Language:", "[English]", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+    draw_key_value(2, 20, 30, "Language:", "[English]", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
         COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 2);
 
-    tui_text(2, 3, "System Information", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
-    tui_horizontal_line(2, 4, 49, 4, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
+    draw_text(2, 3, "System Information", COLOR_LIGHTGRAY << 4 | COLOR_BLACK);
+    draw_horizontal_line(2, 4, 49, COLOR_LIGHTGRAY << 4 | COLOR_BLUE);
 
-    tui_text_item(2, 6, 30, "Firmware Version:", "0.1.0", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 6, 30, "Firmware Version:", "0.1.0", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
-    tui_text_item(2, 7, 30, "Build Date:", __DATE__, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 7, 30, "Build Date:", __DATE__, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
     
-    tui_text_item(2, 12, 30, "CPU:", "80286", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 12, 30, "CPU:", "80286", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
-    tui_text_item(2, 13, 30, "FPU:", "Present", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 13, 30, "FPU:", "Present", COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
 
     size_t memsize = as_uint16(cmos_read(0x15), cmos_read(0x14));
     snprintf(str, 16, "%u KB", memsize);
-    tui_text_item(2, 14, 30, "Base Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 14, 30, "Base Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
 
     size_t extsize = as_uint16(cmos_read(0x18), cmos_read(0x17));
     snprintf(str, 16, "%u KB", extsize);
-    tui_text_item(2, 15, 30, "Ext. Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 15, 30, "Ext. Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
 
     size_t totalsize = memsize + extsize;
     snprintf(str, 16, "%u KB", totalsize);
-    tui_text_item(2, 16, 30, "Tot. Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+    draw_key_value(2, 16, 30, "Tot. Memory:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
 
-    tui_text_item(2, 18, 30, "Video:", "Unknown", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
+    draw_key_value(2, 18, 30, "Video:", "Unknown", COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 
         COLOR_LIGHTGRAY << 4 | COLOR_BLACK, 0);
 }
 
 static void setup_show_config(setup_status_t __seg_ss* status)
 {
-    if (status->refresh)
-        setup_draw_background(MENU_CONFIG);
+    char __far* str = (char __far*)get_ebda()->buffer;
+
+    uint8_t floppy_a = (cmos_read(0x10) & 0xF0) >> 4;
+    uint8_t floppy_b = (cmos_read(0x10) & 0x0F) >> 0;
+
+    switch (status->key)
+    {
+        case KEY_UP:
+            if (status->selected > 0) status->selected--;
+            status->refresh = 1;
+            break;
+        case KEY_DOWN:
+            if (status->selected < 1) status->selected++;
+            status->refresh = 1;
+            break;
+        case KEY_ENTER:
+            if (status->selected == 0)
+            {
+                floppy_a = (uint8_t)((floppy_a + 1) % 6);
+                cmos_write(0x10, (uint8_t)(floppy_b | (floppy_a << 4)));
+                cmos_checksum_compute();
+            }
+            else
+            {
+                floppy_b = (uint8_t)((floppy_b + 1) % 6);
+                cmos_write(0x10, (uint8_t)(floppy_b | (floppy_a << 4)));
+                cmos_checksum_compute();
+            }
+            status->refresh = 1;
+            break;
+        case KEY_ESC:
+            status->menu_id = MENU_SYSTEM;
+            status->key = 0;
+            return;
+        default: break;
+    };
+
+    if (status->refresh != 1)
+        return;
+
+    draw_text(2, 3, "System Configuration", make_attr(COLOR_BLACK, COLOR_LIGHTGRAY));
+    draw_horizontal_line(2, 4, 49, make_attr(COLOR_BLUE, COLOR_LIGHTGRAY));
+
+    snprintf(str, 16, "[%s]", to_fp(setup_floppy[floppy_a]));
+    draw_key_value(2, 6, 30, "Floppy Drive 0:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+        COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 0);
+
+    snprintf(str, 16, "[%s]", to_fp(setup_floppy[floppy_b]));
+    draw_key_value(2, 7, 30, "Floppy Drive 1:", str, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
+        COLOR_BLACK << 4 | COLOR_LIGHTGRAY, status->selected == 1);
 }
 
 void setup_main(void)
@@ -388,7 +437,7 @@ void setup_main(void)
     setup_status_t status = {};
     status.refresh = 1;
 
-    bios_video_set_cursor_type(0x20, 0x20);
+    bios_set_cursor_type(0x20, 0x20);
 
     while (true)
     {
@@ -419,7 +468,7 @@ void setup_main(void)
         }
 
         if (status.refresh)
-            setup_draw_background(MENU_SYSTEM);
+            setup_draw_background(status.menu_id);
 
         switch (status.menu_id)
         {
@@ -448,8 +497,8 @@ void setup_boot(void)
 
     ebda_t __far* ebda = get_ebda();
 
-    bios_video_set_cursor_type(0x20, 0x20);
-    bios_video_scroll_wnd_down(25, COLOR_BLACK << 4 | COLOR_LIGHTGRAY, 0, 80, 0, 25);
+    bios_set_cursor_type(0x20, 0x20);
+    bios_scroll_wnd_down(25, COLOR_BLACK << 4 | COLOR_LIGHTGRAY, 0, 80, 0, 25);
 
     while (true)
     {
@@ -492,17 +541,17 @@ void setup_boot(void)
             snprintf(ebda->buffer, 30, "Device %02u:", i);
             off = (uint8_t)((80 / 2) - (fstrlen(ebda->buffer) + 32) / 2);
 
-            tui_text_item(off, (uint8_t)(4 + i), 11, ebda->buffer,
+            draw_key_value(off, (uint8_t)(4 + i), 11, ebda->buffer,
                 ebda->block_table[i].desc, COLOR_BLACK << 4 | COLOR_LIGHTGRAY,
                 COLOR_LIGHTGRAY << 4 | COLOR_BLACK, update.selected == i);
-                
+
             if (update.selected == i)
                 id = ebda->block_table[i].id;
 
             entries++;
         }
 
-        tui_text_item(off, (uint8_t)(4 + entries), 11, "", "Enter Setup",
+        draw_key_value(off, (uint8_t)(4 + entries), 11, "", "Enter Setup",
             COLOR_BLACK << 4 | COLOR_LIGHTGRAY, COLOR_LIGHTGRAY << 4 | COLOR_BLACK,
             update.selected == entries);
 
