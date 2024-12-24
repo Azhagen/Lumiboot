@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Install GCC IA16
-      run: add-apt-repository ppa:tkchia/build-ia16 && apt update && apt install gcc-ia16-elf
+      run: sudo add-apt-repository ppa:tkchia/build-ia16 && sudo apt update && sudo apt install gcc-ia16-elf
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
