@@ -19,9 +19,8 @@ entry16:
     cmp  al, 0x0A
     je   entry_rmode
 
-    mov al, 0x64
-
     // Set the timer for memory refresh
+    mov  al, 0x64
     out  0x43, al
     mov  ax, 2386
     out  0x41, al
