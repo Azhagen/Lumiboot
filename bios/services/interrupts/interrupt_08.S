@@ -14,10 +14,6 @@
 
 #define EOI 0x20
 
-#define LO 0
-#define HI 2
-#define OF 4
-
 .section .legacy.int08h, "ax", @progbits
 .global interrupt_08h
 .type   interrupt_08h, @function
