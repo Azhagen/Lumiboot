@@ -7,6 +7,9 @@
 
 void block_handler(registers_t __seg_ss* const regs)
 {
+    debug_out("ah: %02X, al: %02X, bx: %04X, ch: %02X, cl: %02X, dh: %02X, dl: %02X, es: %04X\n\r",
+        regs->ah, regs->al, regs->bx, regs->ch, regs->cl, regs->dh, regs->dl, regs->es);
+
     switch (regs->ah)
     {
         case 0x00: block_reset(regs); break;
@@ -79,15 +82,7 @@ void block_read(registers_t __seg_ss* const regs)
 
     result  = blk->send_cmd(blk, &cmd);
 
-    // for (size_t i = 0; i < 16; ++i)
-    // {
-    //     for (size_t j = 0; j < 16; ++j)
-    //         debug_out("%02X ", ((uint8_t __far*)cmd.buf)[i * 16 + j]);
-    //     debug_puts("\n\r");
-    // }
-
 end:
-    // debug_out("Result: %x\n\r", result);
     regs->ah = result;
     regs->CF = result != 0x00;
 }
