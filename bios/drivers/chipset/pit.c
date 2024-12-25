@@ -9,7 +9,7 @@
 
 void pit_set_channel(uint8_t channel, uint8_t mode, uint16_t reload)
 {
-    if (channel >= 3 && mode >= 8)
+    if (channel >= 3 || mode >= 8)
         return;
 
     uint8_t cmd = (uint8_t)((channel << 6) | (3 << 4) | (mode << 1));
