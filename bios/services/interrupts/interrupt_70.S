@@ -10,7 +10,9 @@
 .global interrupt_70h
 .type   interrupt_70h, @function
 interrupt_70h:
+    push ax
     mov  al, PIC_EOI
     out  PIC_CMD1, al
     out  PIC_CMD2, al
+    pop  ax
     iret
