@@ -189,7 +189,7 @@ void boot_disk(uint8_t drive)
 
     debug_puts("[BIOS] Found boot disk\n\r");
 
-    bios_video_set_mode(0x03);
+    bios_set_video_mode(0x03);
     bios_move_cursor(0, 0, 0);
 
     boot_start(drive);

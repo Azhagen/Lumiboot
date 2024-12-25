@@ -14,7 +14,7 @@ static void int10h_call(bioscall __seg_ss* const regs)
         : "memory", "cc", "si", "di", "es", "ds", "bp");
 }
 
-void bios_video_set_mode(uint8_t mode)
+void bios_set_video_mode(uint8_t mode)
 {
     bioscall regs = {0};
     regs.ah = 0x00;
