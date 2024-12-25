@@ -272,7 +272,7 @@ void bios_init(void)
 
     block_list_all();
     
-    bios_video_set_mode(0x03);
+    bios_set_video_mode(0x03);
     splash_screen();
 
     while (true)
