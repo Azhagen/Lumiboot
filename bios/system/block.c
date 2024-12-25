@@ -159,10 +159,15 @@ uint8_t block_create(uint8_t type, uint8_t sub, uint8_t flags, uint64_t lba,
     blk.type  = type;
     blk.sub   = sub;
     blk.lba   = lba;
-    blk.geom  = geom;
+    // blk.geom  = geom;
     blk.size  = size;
     blk.io    = io;
     blk.flags = flags;
+
+    // FIXME: gcc crashes when using lto
+    blk.geom.cylinders = geom.cylinders;
+    blk.geom.heads     = geom.heads;
+    blk.geom.sectors   = geom.sectors;
 
     blk.send_cmd = block_set_command(type);
     if (!blk.send_cmd)
