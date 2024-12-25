@@ -12,12 +12,21 @@ entry16:
     cli
     cld
 
+    // Check the reset code
     mov  al, 0x80 | 0x0F
     out  0x70, al
     in   al, 0x71
-
     cmp  al, 0x0A
     je   entry_rmode
+
+    mov al, 0x64
+
+    // Set the timer for memory refresh
+    out  0x43, al
+    mov  ax, 2386
+    out  0x41, al
+    mov  al, ah
+    out  0x41, al
 
     mov  ax, 0xF000
     mov  ds, ax
