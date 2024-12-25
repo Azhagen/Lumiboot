@@ -2,23 +2,22 @@
 .intel_syntax noprefix
 
 .section .legacy.int13h, "ax", @progbits
-
 .global interrupt_13h
 .type   interrupt_13h, @function
 interrupt_13h:
+    sti
     pusha
     push es
     push ds
     pushf
 
-    sti
     mov  ax, 0xF000
     mov  ds, ax
 
-    mov  ax, sp
-    push ax
+    mov  bp, sp
+    push bp
     call block_handler
-    pop  ax
+    pop  bp
 
     popf
     pop  ds
