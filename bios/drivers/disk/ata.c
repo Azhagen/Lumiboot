@@ -188,7 +188,7 @@ uint8_t ata_reset(block_t __far* blk)
 }
 
 uint8_t ata_read_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
-    uint16_t sector, uint8_t count, void __far* buffer)
+    uint16_t sector, uint8_t count, uint32_t buffer)
 {
     // debug_out("[BIOS] Reading %d sectors from CHS %d:%d:%d\n\r",
     //     count, cylinder, head, sector);
@@ -203,7 +203,7 @@ uint8_t ata_read_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     ata_write(blk->io, ATA_LBA_HI, (uint8_t)(cylinder >> 8));
     ata_write(blk->io, ATA_COMMAND, ATA_CMD_READ_PIO);
 
-    uint16_t __far* buf = (uint16_t __far*)buffer;
+    uint16_t __far* buf = linear_to_fp(buffer);
 
     for (size_t i = 0; i < count; ++i)
     {
@@ -220,7 +220,7 @@ uint8_t ata_read_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
 }
 
 uint8_t ata_write_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
-    uint16_t sector, uint8_t count, void __far* buffer)
+    uint16_t sector, uint8_t count, uint32_t buffer)
 {
     // debug_out("[BIOS] Writing %d sectors to CHS %d:%d:%d\n\r",
     //     count, cylinder, head, sector);
@@ -235,7 +235,7 @@ uint8_t ata_write_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     ata_write(blk->io, ATA_LBA_HI, (uint8_t)(cylinder >> 8));
     ata_write(blk->io, ATA_COMMAND, ATA_CMD_WRITE_PIO);
 
-    uint16_t __far* buf = (uint16_t __far*)buffer;
+    uint16_t __far* buf = linear_to_fp(buffer);
 
     for (size_t i = 0; i < count; ++i)
     {
@@ -274,7 +274,7 @@ uint8_t ata_verify_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
 }
 
 uint8_t ata_format_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
-    uint16_t sector, uint8_t count, void __far* buffer)
+    uint16_t sector, uint8_t count, uint32_t buffer)
 {
     uint8_t drive = blk->sub == BLOCK_SUB_PRIMARY ? 0xA0 : 0xB0;
     ata_write(blk->io, ATA_DRIVE, (uint8_t)(drive | (head & 0x0F)));
@@ -289,7 +289,7 @@ uint8_t ata_format_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     if (!ata_poll(blk->io))
         return BLOCK_ERROR;
 
-    uint16_t __far* buf = (uint16_t __far*)buffer;
+    uint16_t __far* buf = linear_to_fp(buffer);
 
     for (size_t i = 0; i < 256; ++i)
     {
@@ -302,7 +302,7 @@ uint8_t ata_format_chs(block_t __far* blk, uint16_t cylinder, uint16_t head,
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_read_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __far* buffer)
+uint8_t ata_read_lba(block_t __far* blk, uint32_t lba, uint32_t count, uint32_t buffer)
 {
     // debug_out("[BIOS] Reading %lu sectors from LBA %lu\n\r", count, lba);
 
@@ -316,7 +316,7 @@ uint8_t ata_read_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __fa
     ata_write(blk->io, ATA_LBA_HI, (uint8_t)((lba >> 16) & 0xFF));
     ata_write(blk->io, ATA_COMMAND, ATA_CMD_READ_PIO);
 
-    uint16_t __far* buf = (uint16_t __far*)buffer;
+    uint16_t __far* buf = linear_to_fp(buffer);
 
     for (size_t i = 0; i < count; ++i)
     {
@@ -332,7 +332,7 @@ uint8_t ata_read_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __fa
     return BLOCK_SUCCESS;
 }
 
-uint8_t ata_write_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __far* buffer)
+uint8_t ata_write_lba(block_t __far* blk, uint32_t lba, uint32_t count, uint32_t buffer)
 {
     // debug_out("[BIOS] Writing %lu sectors to LBA %lu\n\r", count, lba);
 
@@ -346,7 +346,7 @@ uint8_t ata_write_lba(block_t __far* blk, uint32_t lba, uint32_t count, void __f
     ata_write(blk->io, ATA_LBA_HI, (uint8_t)((lba >> 16) & 0xFF));
     ata_write(blk->io, ATA_COMMAND, ATA_CMD_WRITE_PIO);
 
-    uint16_t __far* buf = (uint16_t __far*)buffer;
+    uint16_t __far* buf = linear_to_fp(buffer);
 
     for (size_t i = 0; i < count; ++i)
     {

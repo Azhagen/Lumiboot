@@ -74,19 +74,6 @@
 #define FLOPPY_ERR_TIMEOUT      0x80
 #define FLOPPY_ERR_SENSE        0xFF
 
-struct fdc_parameters
-{
-    uint8_t drive;
-    uint8_t head;
-    uint8_t cylinder;
-    uint8_t sector;
-    uint8_t count;
-    uint16_t segment;
-    uint16_t offset;
-};
-
-typedef struct fdc_parameters fdc_parameters;
-
 void fdc_detect(void);
 
 // uint8_t fdc_reset_controller(uint8_t drive);
@@ -104,11 +91,7 @@ uint8_t fdc_sense_media(block_t __far* blk);
 uint8_t fdc_check_media(block_t __far* blk);
 
 
-uint8_t fdc_read_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint16_t count, void __far* buffer);
-uint8_t fdc_write_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint8_t count, void __far* buffer);
-uint8_t fdc_verify_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint8_t count);
-uint8_t fdc_format_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint8_t count, void __far* buffer);
+uint8_t fdc_read_chs(block_t __far* blk, const command_t __seg_ss* params);
+uint8_t fdc_write_chs(block_t __far* blk, const command_t __seg_ss* params);
+uint8_t fdc_verify_chs(block_t __far* blk, const command_t __seg_ss* params);
+uint8_t fdc_format_chs(block_t __far* blk, const command_t __seg_ss* params);

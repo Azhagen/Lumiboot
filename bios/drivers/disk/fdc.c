@@ -79,12 +79,14 @@ static bool fdc_wait_irq(void)
     return pit_wait_until(1000, fdc_test_irq);
 }
 
-static bool fdc_dma_setup(uint16_t segment, uint16_t offset, uint16_t count, uint8_t mode)
+static bool fdc_dma_setup(uint32_t linear, uint16_t count, uint8_t mode)
 {
-    uint32_t value = segoff_to_linear(offset, segment);
-    uint16_t addr = lo16(value);
+    // uint32_t value = linear;
+    uint16_t addr = lo16(linear);
     uint16_t size = (count << 9) - 1;
-    uint8_t  page = lo(hi16(value) + (segment >> 12));
+    uint8_t  page = lo(hi16(linear));
+
+    // debug_out("DMA: Linear %lx, Addr %x, Size %x, Page %x, Mode %x\r\n", linear, addr, size, page, mode);
 
     if (addr > 0xFFFF - size) return false;
 
@@ -226,18 +228,20 @@ static uint8_t fdc_cmd_read_id(uint16_t iobase, uint8_t drive, uint8_t head)
 }
 
 
-static uint8_t fdc_cmd_rwv(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint16_t count, void __far* buffer, uint8_t fdc_cmd, uint8_t dma_cmd)
+static uint8_t fdc_cmd_rwv(block_t __far* blk, const command_t __seg_ss* params,
+    uint8_t fdc_cmd, uint8_t dma_cmd)
 {
-    uint8_t cylinder = (uint8_t)chs->cylinders;
-    uint8_t head     = (uint8_t)chs->heads;
-    uint8_t sector   = (uint8_t)chs->sectors;
+    uint8_t  cylinder = (uint8_t)params->chs.cylinders;
+    uint8_t  head     = (uint8_t)params->chs.heads;
+    uint8_t  sector   = (uint8_t)params->chs.sectors;
+    uint8_t  count    = (uint8_t)params->cnt;
+    uint32_t buffer   = params->buf;
 
     fdc_select_drive(blk->io, blk->sub);
 
     if (blk->flags & BLOCK_RECAL)
     {
-        debug_out("[BIOS] FDC: Recalibrating drive %d\n\r", blk->sub);
+        debug_puts("[BIOS] FDC: Recalibrating drive\n\r");
         if (fdc_cmd_recalibrate(blk->io, blk->sub) != BLOCK_SUCCESS)
             return BLOCK_ERROR;
 
@@ -246,13 +250,12 @@ static uint8_t fdc_cmd_rwv(block_t __far* blk, geometry_t __seg_ss* chs,
 
     if (!(blk->flags & BLOCK_MEDIA))
     {
-        debug_out("[BIOS] FDC: Sense media\n\r");
+        debug_puts("[BIOS] FDC: Sensing media\n\r");
         if (fdc_sense_media(blk) != BLOCK_SUCCESS)
             return BLOCK_ERROR;
     }
 
-    pointer ptr = (pointer)buffer;
-    if (!fdc_dma_setup(ptr.seg, ptr.off, count, dma_cmd))
+    if (!fdc_dma_setup(buffer, count, dma_cmd))
         return FLOPPY_ERR_BOUNDARY;
 
     if (fdc_seek_absolute(blk->io, blk->sub, cylinder, head) != BLOCK_SUCCESS)
@@ -333,20 +336,18 @@ void fdc_detect(void)
 
 uint8_t fdc_send_cmd(block_t __far* blk, command_t __seg_ss* cmd)
 {
-    uint8_t count = (uint8_t)cmd->cnt;
-    
     switch (cmd->cmd)
     {
         case BLOCK_CMD_RESET:
             return fdc_reset(blk);
         case BLOCK_CMD_CHS_READ:
-            return fdc_read_chs(blk, &cmd->chs, count, cmd->buf);
+            return fdc_read_chs(blk, cmd);
         case BLOCK_CMD_CHS_WRITE:
-            return fdc_write_chs(blk, &cmd->chs, count, cmd->buf);
+            return fdc_write_chs(blk, cmd);
         case BLOCK_CMD_CHS_VERIFY:
-            return fdc_verify_chs(blk, &cmd->chs, count);
+            return fdc_verify_chs(blk, cmd);
         case BLOCK_CMD_CHS_FORMAT:
-            return fdc_format_chs(blk, &cmd->chs, count, cmd->buf);
+            return fdc_format_chs(blk, cmd);
         case BLOCK_CMD_CHANGE:
             return fdc_check_media(blk);
             
@@ -376,14 +377,14 @@ uint8_t fdc_sense_media(block_t __far* blk)
     {
         fdc_select_drive(blk->io, blk->sub);
 
-        debug_out("[BIOS] FDC: Drive %d: Testing rate %d\n\r", blk->sub, rates[i]);
+        // debug_out("[BIOS] FDC: Drive %d: Testing rate %d\n\r", blk->sub, rates[i]);
 
         io_write(blk->io + FDC_CONF, rates[i]);
 
         if (fdc_cmd_read_id(blk->io, blk->sub, 0) != BLOCK_SUCCESS)
             continue;
 
-        debug_out("[BIOS] FDC: Drive %d: Media detected, rate %d\n\r", blk->sub, rates[i]);
+        // debug_out("[BIOS] FDC: Drive %d: Media detected, rate %d\n\r", blk->sub, rates[i]);
 
         blk->flags |= BLOCK_MEDIA;
         return BLOCK_SUCCESS;
@@ -401,36 +402,28 @@ uint8_t fdc_check_media(block_t __far* blk)
         blk->flags &= (uint8_t)(~BLOCK_MEDIA);
         return BLOCK_ERR_MEDIA;
     }
-    else
+
         return BLOCK_SUCCESS;
 }
 
-uint8_t fdc_read_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint16_t count, void __far* buffer)
+uint8_t fdc_read_chs(block_t __far* blk, const command_t __seg_ss* params)
 {
-    return fdc_cmd_rwv(blk, chs, count, buffer, FDC_CMD_READ_SECT |
-        FDC_CMD_EXT_MULTITRACK | FDC_CMD_EXT_DENSITY, DMA_READ_CH2);
+    return fdc_cmd_rwv(blk, params, FDC_READ_CMD, DMA_READ_CH2);
 }
 
-uint8_t fdc_write_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint8_t count, void __far* buffer)
+uint8_t fdc_write_chs(block_t __far* blk, const command_t __seg_ss* params)
 {
-    return fdc_cmd_rwv(blk, chs, count, buffer, FDC_CMD_WRITE_SECT |
-        FDC_CMD_EXT_MULTITRACK | FDC_CMD_EXT_DENSITY, DMA_WRITE_CH2);
+    return fdc_cmd_rwv(blk, params, FDC_WRITE_CMD, DMA_WRITE_CH2);
 }
 
-uint8_t fdc_verify_chs(block_t __far* blk, geometry_t __seg_ss* chs, uint8_t count)
+uint8_t fdc_verify_chs(block_t __far* blk, const command_t __seg_ss* params)
 {
-    return fdc_cmd_rwv(blk, chs, count, NULL, FDC_CMD_READ_SECT |
-        FDC_CMD_EXT_MULTITRACK | FDC_CMD_EXT_DENSITY, DMA_VERIFY_CH2);
+    return fdc_cmd_rwv(blk, params, FDC_READ_CMD, DMA_VERIFY_CH2);
 }
 
-uint8_t fdc_format_chs(block_t __far* blk, geometry_t __seg_ss* chs,
-    uint8_t count, void __far* buffer)
+uint8_t fdc_format_chs(block_t __far* blk, const command_t __seg_ss* params)
 {
-    (void)blk;
-    (void)chs;
-    (void)count;
-    (void)buffer;
+    (void) blk;
+    (void) params;
     return BLOCK_ERROR;
 }

@@ -60,7 +60,7 @@ typedef struct command  command_t;
 typedef struct fixed_disk_parameter_table fdpt_t;
 typedef struct diskette_parameter_table   dkpt_t;
 
-struct geometry
+struct __packed geometry
 {
     uint16_t cylinders;
     uint16_t heads;
@@ -69,14 +69,14 @@ struct geometry
 
 struct __packed command
 {
-    uint8_t     cmd; // Command
-    uint8_t     flg; // Flags
+    uint8_t    cmd; // Command
+    uint8_t    flg; // Flags
     union {
-    uint64_t    lba; // LBA address
-    geometry_t  chs;
+    uint64_t   lba; // LBA address
+    geometry_t chs;
     };
-    uint32_t    cnt; // sector count
-    void __far* buf; // Buffer
+    uint32_t   cnt; // sector count
+    uint32_t   buf; // Linear buffer address
 };
 
 typedef uint8_t (*send_cmd_t)(block_t __far* blk, command_t __seg_ss* cmd);

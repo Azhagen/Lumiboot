@@ -75,6 +75,14 @@ static inline farptr_t segoff_to_fp(uint16_t seg, uint16_t off)
     return ptr.ptr;
 }
 
+static inline pointer linear_to_ptr(uint32_t addr)
+{
+    pointer ptr;
+    ptr.seg = (uint16_t)((addr >> 4) & 0xF000);
+    ptr.off = (uint16_t)(addr & 0xFFFF);
+    return ptr;
+}
+
 static inline farptr_t linear_to_fp(uint32_t addr)
 {
     pointer ptr;
@@ -83,9 +91,9 @@ static inline farptr_t linear_to_fp(uint32_t addr)
     return ptr.ptr;
 }
 
-static inline uint32_t segoff_to_linear(uint16_t off, uint16_t seg)
+static inline uint32_t segoff_to_linear(uint16_t seg, uint16_t off)
 {
-    return (uint32_t)(off) + (uint32_t)(seg << 4);
+    return ((uint32_t)(seg) << 4) + off;
 }
 
 static inline uint16_t linear_to_seg(uint32_t addr)
@@ -106,6 +114,11 @@ static inline uint32_t as_uint32(uint16_t hi, uint16_t lo)
 static inline void __far* to_fp(void* addr)
 {
     return __builtin_ia16_static_far_cast(addr);
+}
+
+static inline void __far* ss_to_fp(void __seg_ss* addr)
+{
+    return addr;
 }
 
 static inline uint8_t binary_to_bcd(uint8_t value)
