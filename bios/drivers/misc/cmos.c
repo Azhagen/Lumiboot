@@ -17,7 +17,13 @@ uint8_t cmos_read(uint8_t reg)
 
 void cmos_enable_nmi(void)
 {
-    io_write(0x70, 0);
+    io_write(0x70, io_read(0x70) & 0x7F);
+    io_read(0x71);
+}
+
+void cmos_disable_nmi(void)
+{
+    io_write(0x70, io_read(0x70) | 0x80);
     io_read(0x71);
 }
 
@@ -124,6 +130,7 @@ void cmos_init(void)
         cmos_write(i, 0);
 
     cmos_checksum_compute();
+    cmos_disable_nmi();
 }
 
 bool cmos_checksum_valid(void)
