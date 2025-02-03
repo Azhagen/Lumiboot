@@ -7,8 +7,8 @@
 
 void block_handler(registers_t __seg_ss* const regs)
 {
-    debug_out("ah: %02X, al: %02X, bx: %04X, ch: %02X, cl: %02X, dh: %02X, dl: %02X, es: %04X\n\r",
-        regs->ah, regs->al, regs->bx, regs->ch, regs->cl, regs->dh, regs->dl, regs->es);
+    // debug_out("ah: %02X, al: %02X, bx: %04X, ch: %02X, cl: %02X, dh: %02X, dl: %02X, es: %04X\n\r",
+    //     regs->ah, regs->al, regs->bx, regs->ch, regs->cl, regs->dh, regs->dl, regs->es);
 
     switch (regs->ah)
     {
@@ -78,7 +78,7 @@ void block_read(registers_t __seg_ss* const regs)
     cmd.cmd = BLOCK_CMD_CHS_READ;
     cmd.chs = chs;
     cmd.cnt = regs->al;
-    cmd.buf = segoff_to_fp(regs->es, regs->bx);
+    cmd.buf = segoff_to_linear(regs->es, regs->bx);
 
     result  = blk->send_cmd(blk, &cmd);
 
@@ -101,7 +101,7 @@ void block_write(registers_t __seg_ss* const regs)
     cmd.cmd = BLOCK_CMD_CHS_WRITE;
     cmd.chs = chs;
     cmd.cnt = regs->al;
-    cmd.buf = segoff_to_fp(regs->es, regs->bx);
+    cmd.buf = segoff_to_linear(regs->es, regs->bx);
     result  = blk->send_cmd(blk, &cmd);
 
 end:
@@ -123,7 +123,7 @@ void block_verify(registers_t __seg_ss* const regs)
     cmd.cmd = BLOCK_CMD_CHS_VERIFY;
     cmd.chs = chs;
     cmd.cnt = regs->al;
-    cmd.buf = segoff_to_fp(regs->es, regs->bx);
+    cmd.buf = segoff_to_linear(regs->es, regs->bx);
     result = blk->send_cmd(blk, &cmd);
 
 end:
@@ -145,7 +145,7 @@ void block_format(registers_t __seg_ss* const regs)
     cmd.cmd = BLOCK_CMD_CHS_FORMAT;
     cmd.chs = chs;
     cmd.cnt = regs->al;
-    cmd.buf = segoff_to_fp(regs->es, regs->bx);
+    cmd.buf = segoff_to_linear(regs->es, regs->bx);
     result = blk->send_cmd(blk, &cmd);
 
 end:
@@ -314,7 +314,7 @@ void block_ext_read(registers_t __seg_ss* const regs)
     cmd.flg = CMD_EXT;
     cmd.lba = packet->lba;
     cmd.cnt = packet->blocks;
-    cmd.buf = segoff_to_fp(packet->segment, packet->offset);
+    cmd.buf = segoff_to_linear(packet->segment, packet->offset);
     result  = blk->send_cmd(blk, &cmd);
 
 end:
@@ -342,7 +342,7 @@ void block_ext_write(registers_t __seg_ss* const regs)
     cmd.flg = CMD_EXT;
     cmd.lba = packet->lba;
     cmd.cnt = packet->blocks;
-    cmd.buf = segoff_to_fp(packet->segment, packet->offset);
+    cmd.buf = segoff_to_linear(packet->segment, packet->offset);
     result  = blk->send_cmd(blk, &cmd);
 
 end:
