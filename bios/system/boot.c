@@ -16,7 +16,7 @@ void boot_device(uint8_t id)
     cmd.cmd = BLOCK_CMD_CHS_READ;
     cmd.chs = (geometry_t){ 0, 0, 1 };
     cmd.cnt = 1;
-    cmd.buf = bootsect;
+    cmd.buf = 0x7C00L;
 
     uint8_t result = blk->send_cmd(blk, &cmd);
 
